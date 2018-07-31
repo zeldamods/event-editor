@@ -1,0 +1,92 @@
+html, body {
+  background-color: #383838;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  overflow: hidden;
+}
+
+#graph {
+  width: 100%;
+  height: 100%;
+}
+
+/* Graph text */
+text, .edgeLabel {
+  font-weight: 300;
+  font-family: "Helvetica Neue", Helvetica, Arial, sans-serf;
+  font-size: 14px;
+}
+.edgeLabel {
+  color: white;
+  fill: white;
+}
+
+/* Nodes */
+.node.selected > :first-child {
+  stroke: #008ff7;
+  stroke-width: 3px;
+}
+
+.node > :first-child {
+  stroke: #333;
+  fill: #999;
+  stroke-width: 1.5px;
+}
+.node .label {
+  fill: #fffeed;
+}
+
+.node.entry > :first-child {
+  fill: #fff;
+}
+.node.entry .label {
+  fill: #303030;
+}
+
+.node.action > :first-child {
+  fill: #555;
+}
+
+.node.switch > :first-child {
+  fill: #0a62d6;
+}
+
+.node.fork .label, .node.join .label {
+  fill: #303030;
+}
+
+.node.sub_flow > :first-child {
+  fill: #c4371f;
+}
+
+.edgePath path.path {
+  stroke: #888;
+  fill: none;
+  stroke-width: 1.5px;
+}
+
+.edgePath marker {
+  fill: #cecbcb;
+}
+
+.edgePath.selected-in-edge path.path {
+  stroke: #008ff7;
+  stroke-width: 2px;
+}
+.edgePath.selected-in-edge marker {
+  fill: #008ff7;
+}
+.edgePath.selected-out-edge path.path {
+  stroke: #ffffff;
+  stroke-width: 2px;
+}
+.edgePath.selected-out-edge marker {
+  fill: #ffffff;
+}
+
+.selected-in-edge-label, .selected-out-edge-label {
+  font-weight: bold;
+  font-size: 110%;
+  text-shadow: 0 0 10px #000;
+}
