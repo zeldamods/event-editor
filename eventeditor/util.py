@@ -5,8 +5,8 @@ import gzip
 import io
 import os
 import typing
-import PyQt5.Qt as q # type: ignore
 import PyQt5.QtCore as qc # type: ignore
+import PyQt5.QtWidgets as q # type: ignore
 
 def read_flow(path: str, flow: evfl.evfl.EventFlow):
     if path.endswith('.gz'):
