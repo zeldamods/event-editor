@@ -90,7 +90,7 @@ function handleNodeContextMenu(id) {
     actions.push({ divider: true });
   }
 
-  if (graph.renderer.nodeWhitelist) {
+  if (graph.persistentWhitelist) {
     addAction('Show all events', () => graph.renderOnlyConnected());
   } else {
     addAction('Show only connected events', () => graph.renderOnlyConnected(id));
@@ -321,7 +321,7 @@ new QWebChannel(qt.webChannelTransport, (channel) => {
   widget = channel.objects.widget;
 
   function select(id) {
-    if (graph.renderer.nodeWhitelist) {
+    if (graph.persistentWhitelist) {
       graph.renderOnlyConnected(id.toString());
       graph.renderer.select(id, graph.g);
     } else {
@@ -359,7 +359,7 @@ new QWebChannel(qt.webChannelTransport, (channel) => {
   });
 
   widget.fileLoaded.connect(() => {
-    graph.renderer.nodeWhitelist = null;
+    graph.persistentWhitelist = null;
     graph.renderer.clearSelection();
   });
 
