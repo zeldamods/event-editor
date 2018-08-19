@@ -34,6 +34,8 @@ class MainWindow(q.QMainWindow):
         self.centralWidget().setHidden(True)
         self.updateTitleAndActions()
 
+        self.readSettings()
+
     def show(self) -> None:
         super().show()
         if self.args.event_flow_file:
@@ -127,17 +129,34 @@ class MainWindow(q.QMainWindow):
     def closeEvent(self, event) -> None:
         if not self.unsaved or not self.flow:
             event.accept()
+            self.writeSettings()
             return
 
         ret = q.QMessageBox.question(self, 'Unsaved changes', f'{self.flow.name} has unsaved changes. Save changes before closing?', q.QMessageBox.Yes | q.QMessageBox.No | q.QMessageBox.Cancel)
 
         if ret == q.QMessageBox.Yes:
             self.writeFlow(self.flow_path)
+            self.writeSettings()
             event.accept()
         elif ret == q.QMessageBox.No:
+            self.writeSettings()
             event.accept()
         else:
             event.ignore()
+
+    def readSettings(self) -> None:
+        settings = qc.QSettings()
+        settings.beginGroup('MainWindow')
+        self.resize(settings.value('size', qc.QSize(800, 600)))
+        self.move(settings.value('pos', qc.QPoint(200, 200)))
+        settings.endGroup()
+
+    def writeSettings(self) -> None:
+        settings = qc.QSettings()
+        settings.beginGroup('MainWindow')
+        settings.setValue('size', self.size())
+        settings.setValue('pos', self.pos())
+        settings.endGroup()
 
     def updateTitleAndActions(self) -> None:
         if not self.flow:
@@ -258,13 +277,16 @@ class MainWindow(q.QMainWindow):
         self.flowchart_view.eventNameVisibilityChanged.emit(visible)
 
 def main() -> None:
+    qc.QCoreApplication.setOrganizationName('eventeditor')
+    qc.QCoreApplication.setApplicationName('eventeditor')
+    qc.QSettings.setDefaultFormat(qc.QSettings.IniFormat)
+
     signal.signal(signal.SIGINT, signal.SIG_DFL)
 
     parser = argparse.ArgumentParser(prog='eventeditor', description='An event editor for Breath of the Wild')
     parser.add_argument('event_flow_file', nargs='?', help='Event flow file to open')
     args, _ = parser.parse_known_args()
     app = q.QApplication(sys.argv)
-    app.setApplicationName('eventeditor')
     if os.name == 'nt':
         app_font = app.font()
         app_font.setFamily('Segoe UI')
