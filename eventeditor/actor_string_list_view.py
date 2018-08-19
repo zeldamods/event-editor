@@ -46,7 +46,7 @@ class ActorStringListView(q.QWidget):
 
     def onRemove(self, idx) -> None:
         value = idx.data(qc.Qt.UserRole)
-        if util.is_actor_string_in_use(self.flow_data.flow.flowchart.events.values(), value):
+        if util.is_actor_string_in_use(self.flow_data.flow.flowchart.events, value):
             q.QMessageBox.critical(self, 'Cannot remove', 'This action or query cannot be removed because it is in use. Please remove any references to this action or query first.')
             return
         self.model.remove(idx.row())
