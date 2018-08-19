@@ -33,6 +33,11 @@ class ActorRelatedEventEditDialog(q.QDialog):
         self.attr_list_name = attr_list_name
         self.attr_name = attr_name
 
+        if self.is_switch:
+            self.setWindowTitle('Edit switch event')
+        else:
+            self.setWindowTitle('Edit action event')
+
         self.param_model = ContainerModel(self)
         if not self.event.data.params:
             self.event.data.params = Container()
