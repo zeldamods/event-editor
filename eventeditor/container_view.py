@@ -144,7 +144,9 @@ class ContainerAddItemDialog(q.QDialog):
         super().accept()
 
 class ContainerView(q.QWidget):
-    def __init__(self, parent, model: ContainerModel, flow_data) -> None:
+    autofillRequested = qc.pyqtSignal()
+
+    def __init__(self, parent, model: ContainerModel, flow_data, has_autofill_btn=False) -> None:
         super().__init__(parent)
         self.flow_data = flow_data
         self.action_builders = [] # type: ignore
@@ -169,10 +171,15 @@ class ContainerView(q.QWidget):
         self.add_btn = q.QPushButton('Add...')
         self.add_btn.setStyleSheet('padding: 2px 5px;')
         self.add_btn.clicked.connect(self.onAdd)
+        self.autofill_btn = q.QPushButton('Auto fill')
+        self.autofill_btn.setStyleSheet('padding: 2px 5px;')
+        self.autofill_btn.clicked.connect(self.autofillRequested)
         box = q.QHBoxLayout()
         label = q.QLabel('Parameters')
         label.setStyleSheet('font-weight: bold;')
         box.addWidget(label, stretch=1)
+        if has_autofill_btn:
+            box.addWidget(self.autofill_btn)
         box.addWidget(self.add_btn)
 
         layout = q.QVBoxLayout(self)
@@ -186,6 +193,9 @@ class ContainerView(q.QWidget):
     def onRemove(self, idx) -> None:
         self.model.removeRow(idx.row())
 
+    def onConvertToArgument(self, idx) -> None:
+        self.model.changeTypeToArgument(idx.row())
+
     def addActionBuilder(self, fn) -> None:
         self.action_builders.append(fn)
 
@@ -195,6 +205,7 @@ class ContainerView(q.QWidget):
             return
         idx = smodel.selectedIndexes()[0]
         menu = q.QMenu()
+        menu.addAction('Convert to &argument', lambda: self.onConvertToArgument(idx))
         menu.addAction('&Remove item', lambda: self.onRemove(idx))
         for builder in self.action_builders:
             builder(menu, idx)

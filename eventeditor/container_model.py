@@ -43,6 +43,10 @@ class ContainerModel(qc.QAbstractTableModel):
         self.endRemoveRows()
         return True
 
+    def changeTypeToArgument(self, row: int) -> None:
+        self.cdata[self.keys[row]] = Argument()
+        self.dataChanged.emit(self.createIndex(row, ContainerModelColumn.DataType), self.createIndex(row, ContainerModelColumn.Value))
+
     def columnCount(self, parent) -> int:
         return len(ContainerModelColumn)
 

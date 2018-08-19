@@ -1,12 +1,13 @@
 import copy
 import typing
 
+import eventeditor.ai as ai
 from eventeditor.actor_string_list_model import ActorStringListModel
 from eventeditor.container_model import ContainerModel
 from eventeditor.container_view import ContainerView
 from eventeditor.flow_data import FlowData
 import eventeditor.util as util
-from evfl import Container, Event
+from evfl import Container, Actor, Event
 from evfl.enums import EventType
 import evfl.event
 import PyQt5.QtCore as qc # type: ignore
@@ -29,7 +30,7 @@ class ActorRelatedEventEditDialog(q.QDialog):
         self.param_model = ContainerModel(self)
         if not self.event.data.params:
             self.event.data.params = Container()
-        self.modified_params = copy.deepcopy(self.event.data.params)
+        self.modified_params: Container = copy.deepcopy(self.event.data.params)
         self.param_model.set(self.modified_params)
         self.attr_model = ActorStringListModel(self, [])
         util.connect_model_change_signals(self.attr_model, self.flow_data)
@@ -67,7 +68,41 @@ class ActorRelatedEventEditDialog(q.QDialog):
         self.attr_cbox.setCurrentIndex(self.attr_cbox.findData(attr))
 
     def createParametersView(self) -> None:
-        self.param_view = ContainerView(None, self.param_model, self.flow_data)
+        self.param_view = ContainerView(None, self.param_model, self.flow_data, has_autofill_btn=True)
+        self.param_view.autofillRequested.connect(self.onAutofillRequested)
+
+    def onAutofillRequested(self) -> None:
+        new_actor: Actor = self.actor_cbox.currentData()
+        new_attr: str = self.attr_cbox.currentData().v
+        if not new_actor or not new_attr:
+            q.QMessageBox.critical(self, 'Cannot auto fill', 'Please select an actor and a function.')
+            return
+
+        aiprog = ai.load_aiprog(new_actor.identifier.name)
+        if not aiprog:
+            q.QMessageBox.critical(self, 'Cannot auto fill', 'Failed to load the actor AI program')
+            return
+
+        actual_ai_class: typing.Optional[str] = None
+        if self.is_switch:
+            actual_ai_class = aiprog.queries.get(new_attr, None)
+        else:
+            actual_ai_class = aiprog.actions.get(new_attr, None)
+
+        if actual_ai_class is None:
+            q.QMessageBox.critical(self, 'Cannot auto fill', 'The selected action/query is not registered in the AI program.')
+            return
+
+        ai_type = ai.AIType.Query if self.is_switch else ai.AIType.Action
+        parameters = ai.ai_def_instance.get_parameters(ai_type, actual_ai_class)
+
+        self.modified_params.data.clear()
+        if not self.is_switch:
+            self.modified_params.data['IsWaitFinish'] = False
+        for param in parameters:
+            self.modified_params.data[param.name] = param.get_default_value()
+
+        self.param_model.set(self.modified_params)
 
     def onActorSelected(self, actor_idx: int) -> None:
         if actor_idx == -1:
