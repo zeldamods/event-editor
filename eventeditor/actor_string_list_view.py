@@ -1,5 +1,6 @@
 import typing
 
+import eventeditor.ai as ai
 import eventeditor.util as util
 from evfl import EventFlow, Actor
 from evfl.common import StringHolder
@@ -33,8 +34,8 @@ class ActorStringListView(q.QWidget):
         layout.addWidget(self.lview, stretch=1)
 
     def onAdd(self) -> None:
-        text, ok = q.QInputDialog.getText(self, f'{self.label_str}', f'Name of the new action or query:', q.QLineEdit.Normal)
-        if not ok or not text:
+        text = self._getNewString()
+        if not text:
             return
 
         if self.model.has(text):
@@ -43,6 +44,10 @@ class ActorStringListView(q.QWidget):
 
         self.model.append(text)
         self.flow_data.actor_model.refresh()
+
+    def _getNewString(self) -> str:
+        text, ok = q.QInputDialog.getText(self, f'{self.label_str}', f'Name of the new action or query:', q.QLineEdit.Normal)
+        return text
 
     def onRemove(self, idx) -> None:
         value = idx.data(qc.Qt.UserRole)
@@ -66,3 +71,37 @@ class ActorStringListView(q.QWidget):
         for builder in self.action_builders:
             builder(menu, idx)
         menu.exec_(self.sender().viewport().mapToGlobal(pos))
+
+class ActorActionListView(ActorStringListView):
+    def __init__(self, parent, model, flow_data) -> None:
+        super().__init__(parent, 'Actions', model, flow_data)
+        self.actor: typing.Optional[Actor] = None
+
+    def setActor(self, actor: Actor) -> None:
+        self.actor = actor
+
+    def _getNewString(self) -> str:
+        if not self.actor:
+            return ''
+        name = self.actor.identifier.name
+        aiprog = ai.load_aiprog(name)
+        actions = list(aiprog.actions.keys()) if aiprog else []
+        text, ok = q.QInputDialog.getItem(self, 'Select an action', f'Action for {name}:', actions)
+        return text if ok else ''
+
+class ActorQueryListView(ActorStringListView):
+    def __init__(self, parent, model, flow_data) -> None:
+        super().__init__(parent, 'Queries', model, flow_data)
+        self.actor: typing.Optional[Actor] = None
+
+    def setActor(self, actor: Actor) -> None:
+        self.actor = actor
+
+    def _getNewString(self) -> str:
+        if not self.actor:
+            return ''
+        name = self.actor.identifier.name
+        aiprog = ai.load_aiprog(name)
+        queries = list(aiprog.queries.keys()) if aiprog else []
+        text, ok = q.QInputDialog.getItem(self, 'Select a query', f'Query for {name}:', queries)
+        return text if ok else ''

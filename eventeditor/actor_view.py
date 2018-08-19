@@ -3,7 +3,7 @@ import typing
 
 from eventeditor.actor_model import ActorModelColumn
 from eventeditor.actor_string_list_model import ActorStringListModel
-from eventeditor.actor_string_list_view import ActorStringListView
+from eventeditor.actor_string_list_view import ActorActionListView, ActorQueryListView
 from eventeditor.container_model import ContainerModel
 from eventeditor.container_view import ContainerView
 import eventeditor.util as util
@@ -121,10 +121,13 @@ class ActorDetailPane(q.QWidget):
         self.action_model.set(self.actor.actions if self.actor else [])
         self.query_model.set(self.actor.queries if self.actor else [])
         self.container_model.set(self.actor.params if self.actor else None)
+        if self.actor:
+            self.action_view.setActor(self.actor)
+            self.query_view.setActor(self.actor)
 
     def initWidgets(self) -> None:
-        self.action_view = ActorStringListView(self, 'Actions', self.action_model, self.flow_data)
-        self.query_view = ActorStringListView(self, 'Queries', self.query_model, self.flow_data)
+        self.action_view = ActorActionListView(self, self.action_model, self.flow_data)
+        self.query_view = ActorQueryListView(self, self.query_model, self.flow_data)
         self.container_view = ContainerView(self, self.container_model, self.flow_data)
 
     def initLayout(self) -> None:

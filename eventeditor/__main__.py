@@ -8,6 +8,7 @@ import typing
 
 import evfl
 from evfl import EventFlow
+import eventeditor.ai as ai
 from eventeditor.actor_view import ActorView
 from eventeditor.event_view import EventView
 from eventeditor.flow_data import FlowData
@@ -146,6 +147,7 @@ class MainWindow(q.QMainWindow):
 
     def readSettings(self) -> None:
         settings = qc.QSettings()
+        ai.set_rom_path(settings.value('paths/rom_root'))
         settings.beginGroup('MainWindow')
         self.resize(settings.value('size', qc.QSize(800, 600)))
         self.move(settings.value('pos', qc.QPoint(200, 200)))

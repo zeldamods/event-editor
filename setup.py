@@ -19,7 +19,7 @@ setuptools.setup(
         "Programming Language :: Python :: 3 :: Only",
     ],
     include_package_data=True,
-    install_requires=['evfl>=0.11.1', 'PyYAML~=3.12'],
+    install_requires=['evfl>=0.11.1', 'PyYAML~=3.12', 'aamp~=1.0', 'byml~=2.0', 'wszst_yaz0~=1.1.0'],
     python_requires='>=3.6',
     entry_points={
         'gui_scripts': [
