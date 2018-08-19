@@ -14,6 +14,12 @@ import PyQt5.QtCore as qc # type: ignore
 import PyQt5.QtGui as qg # type: ignore
 import PyQt5.QtWidgets as q # type: ignore
 
+class ActorProxyModel(qc.QIdentityProxyModel):
+    def data(self, index, role):
+        if index.column() == 0 and role == qc.Qt.DisplayRole:
+            return str(self.sourceModel().data(index, qc.Qt.UserRole).identifier)
+        return super().data(index, role)
+
 class ActorRelatedEventEditDialog(q.QDialog):
     def __init__(self, parent, flow_data: FlowData, idx: int, attr_list_name: str, attr_name: str) -> None:
         super().__init__(parent, qc.Qt.WindowTitleHint | qc.Qt.WindowSystemMenuHint)
@@ -55,9 +61,11 @@ class ActorRelatedEventEditDialog(q.QDialog):
         btn_box.rejected.connect(self.reject)
 
     def createActorCbox(self) -> None:
+        self.actor_proxy_model = ActorProxyModel(self)
+        self.actor_proxy_model.setSourceModel(self.flow_data.actor_model)
         self.actor_cbox = q.QComboBox()
         self.actor_cbox.currentIndexChanged.connect(self.onActorSelected)
-        self.actor_cbox.setModel(self.flow_data.actor_model)
+        self.actor_cbox.setModel(self.actor_proxy_model)
         actor = self.event.data.actor.v
         self.actor_cbox.setCurrentIndex(self.actor_cbox.findData(actor))
 
