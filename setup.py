@@ -5,7 +5,7 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name="eventeditor",
-    version="1.0.2",
+    version="1.1.0",
     author="leoetlino",
     author_email="leo@leolam.fr",
     description="Event editor for Breath of the Wild",
