@@ -199,6 +199,7 @@ class ActorView(q.QWidget):
     def connectWidgets(self) -> None:
         self.add_actor_btn.clicked.connect(self.addActor)
         self.flow_data.fileLoaded.connect(lambda: self.add_actor_btn.setEnabled(True))
+        self.flow_data.fileLoaded.connect(lambda: self.hideActorDetailPane())
         self.flow_data.flowDataChanged.connect(self.updateNumActorLabel)
         self.updateNumActorLabel()
 
@@ -227,15 +228,17 @@ class ActorView(q.QWidget):
 
         self.flow_data.actor_model.remove(actor)
 
+    def hideActorDetailPane(self) -> None:
+        self.detail_pane.setActor(None)
+        self.stacked_pane.setCurrentIndex(0)
+
     def onCurrentChanged(self, current, previous) -> None:
         if previous.row() == -1:
-            self.detail_pane.setActor(None)
-            self.stacked_pane.setCurrentIndex(0)
+            self.hideActorDetailPane()
 
     def onSelectionChanged(self, selected, deselected) -> None:
         if len(selected.indexes()) != len(ActorModelColumn):
-            self.detail_pane.setActor(None)
-            self.stacked_pane.setCurrentIndex(0)
+            self.hideActorDetailPane()
             return
 
         self.detail_pane.setActor(selected.indexes()[0].data(qc.Qt.UserRole))
