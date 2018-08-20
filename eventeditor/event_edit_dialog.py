@@ -86,7 +86,7 @@ class ActorRelatedEventEditDialog(q.QDialog):
 
     def onAutofillRequested(self) -> None:
         new_actor: Actor = self.actor_cbox.currentData()
-        new_attr: str = self.attr_cbox.currentData().v
+        new_attr: str = self.attr_cbox.currentData().v if self.attr_cbox.currentData() else ''
         if not new_actor or not new_attr:
             q.QMessageBox.critical(self, 'Cannot auto fill', 'Please select an actor and a function.')
             return
