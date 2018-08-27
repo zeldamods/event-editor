@@ -352,6 +352,10 @@ class ForkEventEditDialog(q.QDialog):
             q.QMessageBox.critical(self, 'Invalid data', 'Please ensure there are no placeholder or duplicate forks left.')
             return
 
+        if self.model.rowCount(qc.QModelIndex()) == 0:
+            q.QMessageBox.critical(self, 'Invalid data', 'Fork events must always have at least one branch.')
+            return
+
         self.model.updateForkList(self.orig_forks)
         self.flow_data.flowDataChanged.emit()
         super().accept()
