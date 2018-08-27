@@ -1,3 +1,4 @@
+from collections import defaultdict
 import copy
 import typing
 
@@ -120,3 +121,93 @@ class EventChooserDialog(q.QDialog):
 
     def getSelectedEvent(self) -> Event:
         return self.selected_event
+
+class CheckableEventParentListModel(qc.QAbstractListModel):
+    def __init__(self, parent, child_event: Event, events: typing.List[Event]) -> None:
+        super().__init__(parent)
+        self.entries: typing.List[typing.Tuple[Event, typing.Any]] = []
+        for event in events:
+            if isinstance(event.data, SwitchEvent):
+                for case, target in event.data.cases.items():
+                    if target.v == child_event:
+                        self.entries.append((event, case))
+            elif isinstance(event.data, ForkEvent):
+                for fork in event.data.forks:
+                    if fork.v == child_event:
+                        self.entries.append((event, fork))
+            else:
+                self.entries.append((event, None))
+
+        self.is_selected = [True] * len(self.entries)
+
+    def getSelectedEvents(self) -> typing.List[typing.Tuple[Event, typing.List[typing.Any]]]:
+        d: typing.DefaultDict[Event, typing.List[typing.Any]] = defaultdict(list)
+        for (event, branch), selected in zip(self.entries, self.is_selected):
+            if not selected:
+                continue
+            d[event].append(branch)
+        return list(d.items())
+
+    def selectAll(self) -> None:
+        self.is_selected = [True] * len(self.entries)
+        if self.entries:
+            self.dataChanged.emit(self.createIndex(0, 0), self.createIndex(len(self.entries) - 1, 0))
+
+    def selectNone(self) -> None:
+        self.is_selected = [False] * len(self.entries)
+        if self.entries:
+            self.dataChanged.emit(self.createIndex(0, 0), self.createIndex(len(self.entries) - 1, 0))
+
+    def rowCount(self, parent) -> int:
+        return len(self.entries)
+
+    def flags(self, index: qc.QModelIndex) -> qc.Qt.ItemFlags:
+        return qc.Qt.ItemIsUserCheckable | super().flags(index)
+
+    def setData(self, index: qc.QModelIndex, value, role) -> bool:
+        if role != qc.Qt.CheckStateRole:
+            return False
+        row = index.row()
+        self.is_selected[index.row()] = True if value == qc.Qt.Checked else False
+        self.dataChanged.emit(index, index)
+        return True
+
+    def data(self, index: qc.QModelIndex, role) -> qc.QVariant:
+        row = index.row()
+        if role == qc.Qt.DisplayRole or role == qc.Qt.ToolTipRole:
+            description = util.get_event_full_description(self.entries[row][0])
+            branch = self.entries[row][1]
+            if branch is not None:
+                if isinstance(branch, int):
+                    description += f' - Case {branch}'
+                else:
+                    description += f' - Branch: {branch.v.name}'
+            return description
+        if role == qc.Qt.CheckStateRole:
+            return qc.Qt.Checked if self.is_selected[row] else qc.Qt.Unchecked
+        return qc.QVariant()
+
+class CheckableEventParentListWidget(q.QWidget):
+    def __init__(self, parent, child_event: Event, events: typing.List[Event]) -> None:
+        super().__init__(parent)
+        self.model = CheckableEventParentListModel(self, child_event, events)
+
+        select_btn_box = q.QHBoxLayout()
+        all_btn = q.QPushButton('All')
+        all_btn.clicked.connect(lambda: self.model.selectAll())
+        none_btn = q.QPushButton('None')
+        none_btn.clicked.connect(lambda: self.model.selectNone())
+        select_btn_box.addStretch()
+        select_btn_box.addWidget(all_btn)
+        select_btn_box.addWidget(none_btn)
+
+        self.view = q.QListView()
+        self.view.setModel(self.model)
+
+        layout = q.QVBoxLayout(self)
+        layout.addLayout(select_btn_box)
+        layout.addWidget(self.view)
+        layout.setContentsMargins(0, 0, 0, 0)
+
+    def getSelectedEvents(self) -> typing.List[typing.Tuple[Event, typing.List[typing.Any]]]:
+        return self.model.getSelectedEvents()

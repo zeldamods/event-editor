@@ -4,7 +4,7 @@ from eventeditor.container_model import ContainerModel
 from eventeditor.container_view import ContainerView
 from eventeditor.event_branch_editors import SwitchEventEditDialog, ForkEventEditDialog
 from eventeditor.event_edit_dialog import show_event_editor
-from eventeditor.event_chooser_dialog import show_event_type_chooser, add_new_event, EventChooserDialog
+from eventeditor.event_chooser_dialog import show_event_type_chooser, add_new_event, EventChooserDialog, CheckableEventParentListWidget
 from eventeditor.event_fork_chooser_dialog import EventForkChooserDialog
 from eventeditor.flow_data import FlowData
 from eventeditor.search_bar import SearchBar
@@ -370,28 +370,45 @@ class FlowchartView(q.QWidget):
             return
         assert self.flow_data.flow and self.flow_data.flow.flowchart
         event = self.flow_data.flow.flowchart.events[event_idx]
+
+        parent_events = [self.flow_data.flow.flowchart.events[i] for i in parent_indices if i >= 0]
+        list_widget = CheckableEventParentListWidget(None, event, parent_events)
+        if parent_events:
+            dialog = q.QDialog(self, qc.Qt.WindowTitleHint | qc.Qt.WindowSystemMenuHint)
+            dialog.setWindowTitle('Add new event above...')
+            btn_box = q.QDialogButtonBox(q.QDialogButtonBox.Ok | q.QDialogButtonBox.Cancel);
+            btn_box.accepted.connect(dialog.accept)
+            btn_box.rejected.connect(dialog.reject)
+            dialog_layout = q.QVBoxLayout(dialog)
+            dialog_layout.addWidget(q.QLabel('Please select links that should be modified to point to the new event you are going to add.'))
+            dialog_layout.addWidget(list_widget)
+            dialog_layout.addWidget(btn_box)
+            ret = dialog.exec_()
+            if not ret:
+                return
+
         new_parent = self.addNewEvent()
         if not new_parent:
             return
-        self._doAddEventAbove([self.flow_data.flow.flowchart.events[i] for i in parent_indices if i >= 0],
-                              event, new_parent)
+
+        self._doAddEventAbove(list_widget.getSelectedEvents(), event, new_parent)
         self.flow_data.flowDataChanged.emit()
         self.delayedSelect(new_parent)
 
-    def _doAddEventAbove(self, parents: typing.List[Event], event: Event, new_parent: Event) -> None:
+    def _doAddEventAbove(self, parents: typing.List[typing.Tuple[Event, typing.List[typing.Any]]], event: Event, new_parent: Event) -> None:
         # Update the parents to point to the new parent.
-        for parent in parents:
+        for parent, branches in parents:
             if isinstance(parent.data, ActionEvent) or isinstance(parent.data, JoinEvent) or isinstance(parent.data, SubFlowEvent):
                 # Easy case: just set the next pointer to the new parent.
                 parent.data.nxt.v = new_parent
 
             # For switch and fork events, update all branches that currently point to the event.
             elif isinstance(parent.data, SwitchEvent):
-                for case in parent.data.cases.keys():
+                for case in branches:
                     if parent.data.cases[case].v == event:
                         parent.data.cases[case].v = new_parent
             elif isinstance(parent.data, ForkEvent):
-                for i, fork in enumerate(parent.data.forks):
+                for i, fork in enumerate(branches):
                     if fork.v == event:
                         parent.data.forks[i].v = new_parent
 
@@ -615,19 +632,19 @@ class FlowchartView(q.QWidget):
         self.eventSelected.connect(dialog.chooserSelectSignal)
         dialog.show()
 
-    def _findEventParentNodes(self, event: Event) -> typing.List[Event]:
-        parents: typing.List[Event] = []
+    def _findEventParentNodes(self, event: Event) -> typing.List[typing.Tuple[Event, typing.List[typing.Any]]]:
+        parents: typing.List[typing.Tuple[Event, typing.List[typing.Any]]] = []
         for e in self.flow_data.flow.flowchart.events:
             data = e.data
             if isinstance(data, ActionEvent) or isinstance(data, JoinEvent) or isinstance(data, SubFlowEvent):
                 if data.nxt.v == event:
-                    parents.append(e)
+                    parents.append((e, []))
             elif isinstance(data, SwitchEvent):
                 if any(case.v == event for case in data.cases.values()):
-                    parents.append(e)
+                    parents.append((e, list(data.cases.keys())))
             elif isinstance(data, ForkEvent):
                 if any(fork.v == event for fork in data.forks):
-                    parents.append(e)
+                    parents.append((e, data.forks))
         return parents
 
     def _doAddFork(self, start: Event, end: Event) -> None:
