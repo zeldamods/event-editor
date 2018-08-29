@@ -31,7 +31,7 @@ class AutoSaveSystem:
         if not save_dir:
             return
         self._save_dir = Path(save_dir)
-        self._save_dir.mkdir(exist_ok=True)
+        self._save_dir.mkdir(parents=True, exist_ok=True)
         self._queue = TaskQueue()
         self.reset()
 
