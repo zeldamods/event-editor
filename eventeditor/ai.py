@@ -2,6 +2,7 @@ import aamp
 import byml
 from enum import IntEnum
 import functools
+import os
 from pathlib import Path
 import typing
 import wszst_yaz0
@@ -11,6 +12,12 @@ def set_rom_path(p: typing.Optional[str]) -> None:
     if p:
         global _rom_path
         _rom_path = Path(p)
+
+def _list_aiprog_files(path: Path):
+    try:
+        return path.glob('*.baiprog')
+    except:
+        return []
 
 class AIProg:
     def __init__(self) -> None:
@@ -34,7 +41,7 @@ class AIProg:
         for rel_root in rel_roots:
             root = _rom_path / rel_root
             aiprog_dir = root/'Actor'/'Pack'/f'{actor_name}.sbactorpack'/'Actor'/'AIProgram'
-            for path in aiprog_dir.glob('*.baiprog'):
+            for path in _list_aiprog_files(aiprog_dir):
                 with open(path, 'rb') as aiprog:
                     pio = aamp.Reader(aiprog.read()).parse()
                 if self._do_load_actor_aiprog(pio):
