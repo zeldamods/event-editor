@@ -1,3 +1,5 @@
 exclude **/_test.py
 recursive-include eventeditor/assets/ *
 include fastentrypoints.py
+include versioneer.py
+include eventeditor/_version.py
