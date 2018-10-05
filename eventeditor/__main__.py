@@ -17,6 +17,7 @@ import eventeditor.util as util
 import PyQt5.QtCore as qc # type: ignore
 import PyQt5.QtGui as qg # type: ignore
 import PyQt5.QtWidgets as q # type: ignore
+from . import _version
 
 class MainWindow(q.QMainWindow):
     def __init__(self, args) -> None:
@@ -36,6 +37,13 @@ class MainWindow(q.QMainWindow):
         self.updateTitleAndActions()
 
         self.readSettings()
+
+        self.initVersionInfo()
+
+    def initVersionInfo(self) -> None:
+        versions = _version.get_versions()
+        self._version: str = versions['version']
+        self._version_rev: str = versions['full-revisionid']
 
     def show(self) -> None:
         super().show()
@@ -93,6 +101,22 @@ class MainWindow(q.QMainWindow):
         view_menu.addAction(self.add_event_action)
         self.add_fork_action = q.QAction('Add fork...', self)
         view_menu.addAction(self.add_fork_action)
+
+        help_menu = menu.addMenu('&Help')
+        wiki_action = q.QAction('Wiki', self)
+        wiki_action.triggered.connect(lambda: qg.QDesktopServices.openUrl(qc.QUrl('https://zeldamods.org')))
+        help_menu.addAction(wiki_action)
+        github_repo_action = q.QAction('GitHub repository', self)
+        github_repo_action.triggered.connect(lambda: qg.QDesktopServices.openUrl(qc.QUrl('https://github.com/leoetlino/event-editor')))
+        help_menu.addAction(github_repo_action)
+        help_menu.addSeparator()
+        about_action = q.QAction('About', self)
+        about_action.triggered.connect(self.about)
+        help_menu.addAction(about_action)
+
+    def about(self) -> None:
+        q.QMessageBox.about(self, 'About EventEditor', f'<h2>EventEditor</h2><p>EventEditor is an open-source event flow editor for <i>The Legend of Zelda: Breath of the Wild.</i></p><p><small>Version: {self._version}<br>Revision: {self._version_rev}</small></p>')
+        pass
 
     def initWidgets(self) -> None:
         self.tab_widget = q.QTabWidget(self)
