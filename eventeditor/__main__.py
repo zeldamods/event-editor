@@ -182,11 +182,21 @@ class MainWindow(q.QMainWindow):
         self.move(settings.value('pos', qc.QPoint(200, 200)))
         settings.endGroup()
 
+        settings.beginGroup('flowchart')
+        self.event_name_visible_action.setChecked(settings.value('visible_names', False, type=bool))
+        self.event_param_visible_action.setChecked(settings.value('visible_params', False, type=bool))
+        settings.endGroup()
+
     def writeSettings(self) -> None:
         settings = qc.QSettings()
         settings.beginGroup('MainWindow')
         settings.setValue('size', self.size())
         settings.setValue('pos', self.pos())
+        settings.endGroup()
+
+        settings.beginGroup('flowchart')
+        settings.setValue('visible_names', self.event_name_visible_action.isChecked())
+        settings.setValue('visible_params', self.event_param_visible_action.isChecked())
         settings.endGroup()
 
     def updateTitleAndActions(self) -> None:
