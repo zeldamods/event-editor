@@ -142,7 +142,7 @@ class FlowchartWebObject(qc.QObject):
 
         # Manually convert to JSON to ensure custom types are handled in a sane way.
         # (It seems QVariant cannot handle the Argument class and always replaces it with null.)
-        return qc.QVariant(json.loads(json.dumps(builder.elements)))
+        return qc.QVariant(json.loads(json.dumps(builder.elements, default=lambda x: str(x))))
 
     @qc.pyqtSlot()
     def emitReadySignal(self):
