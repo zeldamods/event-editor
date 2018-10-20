@@ -1,3 +1,4 @@
+import json
 import typing
 
 from eventeditor.container_model import ContainerModel
@@ -45,6 +46,7 @@ class FlowchartWebObject(qc.QObject):
     flowDataChanged = qc.pyqtSignal()
     fileLoaded = qc.pyqtSignal(EventFlow)
     eventNameVisibilityChanged = qc.pyqtSignal(bool)
+    eventParamVisibilityChanged = qc.pyqtSignal(bool)
     actionProhibitionChanged = qc.pyqtSignal(bool)
 
     selectRequested = qc.pyqtSignal(int)
@@ -85,6 +87,7 @@ class FlowchartWebObject(qc.QObject):
                     'actor': str(data.actor.v.identifier),
                     'action': str(data.actor_action.v),
                     'name': event.name,
+                    'params': data.params.data if data.params else None,
                 })
                 handleNextEvent(nid, data.nxt.v, join_stack)
 
@@ -93,6 +96,7 @@ class FlowchartWebObject(qc.QObject):
                     'actor': str(data.actor.v.identifier),
                     'query': str(data.actor_query.v),
                     'name': event.name,
+                    'params': data.params.data if data.params else None,
                 })
                 for value, case in data.cases.items():
                     builder.addEdge(nid, event_idx_map[case.v], {'value': value})
@@ -118,6 +122,7 @@ class FlowchartWebObject(qc.QObject):
                     'res_flowchart_name': data.res_flowchart_name,
                     'entry_point_name': data.entry_point_name,
                     'name': event.name,
+                    'params': data.params.data if data.params else None,
                 })
                 handleNextEvent(nid, data.nxt.v, join_stack)
 
@@ -135,7 +140,9 @@ class FlowchartWebObject(qc.QObject):
         except IndexError as e:
             q.QMessageBox.critical(self.view, 'Bug', f'An error has occurred while generating graph data: {e}\n\nThe graph may be incomplete. Please report this issue and mention what you did before this message showed up.')
 
-        return qc.QVariant(builder.elements)
+        # Manually convert to JSON to ensure custom types are handled in a sane way.
+        # (It seems QVariant cannot handle the Argument class and always replaces it with null.)
+        return qc.QVariant(json.loads(json.dumps(builder.elements)))
 
     @qc.pyqtSlot()
     def emitReadySignal(self):
@@ -192,6 +199,7 @@ class FlowchartWebObject(qc.QObject):
 class FlowchartView(q.QWidget):
     selectRequested = qc.pyqtSignal(int)
     eventNameVisibilityChanged = qc.pyqtSignal(bool)
+    eventParamVisibilityChanged = qc.pyqtSignal(bool)
 
     # View -> Core
     readySignal = qc.pyqtSignal()
@@ -213,6 +221,7 @@ class FlowchartView(q.QWidget):
         self.flow_data.fileLoaded.connect(self.web_object.fileLoaded)
         self.selectRequested.connect(self.web_object.selectRequested)
         self.eventNameVisibilityChanged.connect(self.web_object.eventNameVisibilityChanged)
+        self.eventParamVisibilityChanged.connect(self.web_object.eventParamVisibilityChanged)
 
         self.view = QWebEngineView()
         self.view.setContextMenuPolicy(qc.Qt.NoContextMenu)

@@ -93,6 +93,11 @@ class MainWindow(q.QMainWindow):
         self.event_name_visible_action.setChecked(False)
         self.event_name_visible_action.triggered.connect(self.onEventNameVisibilityChanged)
         view_menu.addAction(self.event_name_visible_action)
+        self.event_param_visible_action = q.QAction('&Show event parameters', self)
+        self.event_param_visible_action.setCheckable(True)
+        self.event_param_visible_action.setChecked(False)
+        self.event_param_visible_action.triggered.connect(self.onEventParamVisibilityChanged)
+        view_menu.addAction(self.event_param_visible_action)
         self.reload_graph_action = q.QAction('&Reload graph', self)
         self.reload_graph_action.setShortcut('Ctrl+Shift+R')
         view_menu.addAction(self.reload_graph_action)
@@ -283,6 +288,7 @@ class MainWindow(q.QMainWindow):
     def onViewReady(self) -> None:
         self.centralWidget().setHidden(False)
         self.onEventNameVisibilityChanged()
+        self.onEventParamVisibilityChanged()
 
     def onEventSelected(self, event_idx: int) -> None:
         self.event_view.selectEvent(event_idx)
@@ -301,6 +307,10 @@ class MainWindow(q.QMainWindow):
     def onEventNameVisibilityChanged(self) -> None:
         visible = self.event_name_visible_action.isChecked()
         self.flowchart_view.eventNameVisibilityChanged.emit(visible)
+
+    def onEventParamVisibilityChanged(self) -> None:
+        visible = self.event_param_visible_action.isChecked()
+        self.flowchart_view.eventParamVisibilityChanged.emit(visible)
 
 def main() -> None:
     qc.QCoreApplication.setOrganizationName('eventeditor')

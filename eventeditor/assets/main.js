@@ -1,31 +1,48 @@
 let graph;
 let widget;
 let eventNamesVisible = false;
+let eventParamVisible = false;
 let actionsProhibited = false;
 let isDeleting = false;
 
 function getNodeLabel(node) {
   const prefix = eventNamesVisible ? `${node.data.name}\n` : '';
+  let label = node.id;
 
   if (node.node_type === 'entry') {
-    return `${node.data.name}`;
+    label = `${node.data.name}`;
   }
-  if (node.node_type === 'action') {
-    return `${prefix}${node.data.actor}\n${node.data.action}`;
+  else if (node.node_type === 'action') {
+    label = `${prefix}${node.data.actor}\n${node.data.action}`;
   }
-  if (node.node_type === 'switch') {
-    return `${prefix}${node.data.actor}\n${node.data.query}`;
+  else if (node.node_type === 'switch') {
+    label = `${prefix}${node.data.actor}\n${node.data.query}`;
   }
-  if (node.node_type === 'fork') {
-    return `${prefix}Fork`;
+  else if (node.node_type === 'fork') {
+    label = `${prefix}Fork`;
   }
-  if (node.node_type === 'join') {
-    return `${prefix}Join`;
+  else if (node.node_type === 'join') {
+    label = `${prefix}Join`;
   }
-  if (node.node_type === 'sub_flow') {
-    return `${prefix}${node.data.res_flowchart_name}\n<${node.data.entry_point_name}>`;
+  else if (node.node_type === 'sub_flow') {
+    label = `${prefix}${node.data.res_flowchart_name}\n<${node.data.entry_point_name}>`;
   }
-  return node.id;
+
+  if (eventParamVisible && node.data.params) {
+    let i = 0;
+    for (const [key, value] of Object.entries(node.data.params)) {
+      if (key === 'IsWaitFinish') {
+        continue;
+      }
+      if (i >= 5) {
+        label += '\n...'
+        break;
+      }
+      label += `\n${key}: ${value}`;
+      i++;
+    }
+  }
+  return label;
 }
 
 function handleNodeContextMenu(id) {
@@ -370,6 +387,18 @@ new QWebChannel(qt.webChannelTransport, (channel) => {
   widget.eventNameVisibilityChanged.connect((visible) => {
     const previousValue = eventNamesVisible;
     eventNamesVisible = visible;
+    if (!graph.g) {
+      return;
+    }
+    if (visible !== previousValue) {
+      graph.refresh();
+      graph.render();
+    }
+  });
+
+  widget.eventParamVisibilityChanged.connect((visible) => {
+    const previousValue = eventParamVisible;
+    eventParamVisible = visible;
     if (!graph.g) {
       return;
     }
