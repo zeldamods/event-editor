@@ -5,6 +5,8 @@ let eventParamVisible = false;
 let actionsProhibited = false;
 let isDeleting = false;
 
+const WHITELISTED_PARAMS = new Set(['MessageId', 'ASName']);
+
 function getNodeLabel(node) {
   const prefix = eventNamesVisible ? `${node.data.name}\n` : '';
   let label = node.id;
@@ -30,16 +32,21 @@ function getNodeLabel(node) {
 
   if (eventParamVisible && node.data.params) {
     let i = 0;
+    let hasMore = false;
     for (const [key, value] of Object.entries(node.data.params)) {
       if (key === 'IsWaitFinish') {
         continue;
       }
-      if (i >= 5) {
-        label += '\n...'
-        break;
+      const isWhitelisted = WHITELISTED_PARAMS.has(key);
+      if (!isWhitelisted && i >= 5) {
+        hasMore = true;
+      } else {
+        label += `\n${key}: ${value}`;
       }
-      label += `\n${key}: ${value}`;
       i++;
+    }
+    if (hasMore) {
+      label += '\n...';
     }
   }
   return label;
