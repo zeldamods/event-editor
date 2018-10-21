@@ -57,9 +57,12 @@ class FlowchartWebObject(qc.QObject):
 
     @qc.pyqtSlot(result=qc.QVariant)
     def getJson(self) -> qc.QVariant:
+        return qc.QVariant(self.getData())
+
+    def getData(self) -> list:
         flow = self.view.flow_data.flow
         if not flow or not flow.flowchart:
-            return qc.QVariant(dict())
+            return list()
 
         actors = flow.flowchart.actors
         events = flow.flowchart.events
@@ -142,7 +145,7 @@ class FlowchartWebObject(qc.QObject):
 
         # Manually convert to JSON to ensure custom types are handled in a sane way.
         # (It seems QVariant cannot handle the Argument class and always replaces it with null.)
-        return qc.QVariant(json.loads(json.dumps(builder.elements, default=lambda x: str(x))))
+        return json.loads(json.dumps(builder.elements, default=lambda x: str(x)))
 
     @qc.pyqtSlot()
     def emitReadySignal(self):
@@ -289,6 +292,19 @@ class FlowchartView(q.QWidget):
         if is_current and self.update_timer.isActive():
             self.update_timer.stop()
             self.web_object.flowDataChanged.emit()
+
+    def export(self) -> None:
+        if not self.flow_data.flow:
+            return
+        path = q.QFileDialog.getSaveFileName(self, 'Select a location for the graph data', self.flow_data.flow.name + '.json', 'Data (*.json)')[0]
+        if not path:
+            return
+        data = self.web_object.getData()
+        try:
+            with open(path, 'w') as f:
+                json.dump(data, f)
+        except:
+            q.QMessageBox.critical(self, 'Export graph data', 'Failed to write to ' + path)
 
     def reload(self) -> None:
         self.view.reload()

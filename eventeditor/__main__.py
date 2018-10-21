@@ -101,6 +101,8 @@ class MainWindow(q.QMainWindow):
         self.reload_graph_action = q.QAction('&Reload graph', self)
         self.reload_graph_action.setShortcut('Ctrl+Shift+R')
         view_menu.addAction(self.reload_graph_action)
+        self.export_graph_action = q.QAction('E&xport graph data to JSON...', self)
+        view_menu.addAction(self.export_graph_action)
         view_menu.addSeparator()
         self.add_event_action = q.QAction('&Add event...', self)
         view_menu.addAction(self.add_event_action)
@@ -147,6 +149,7 @@ class MainWindow(q.QMainWindow):
         self.flowchart_view.readySignal.connect(self.onViewReady)
         self.flowchart_view.eventSelected.connect(self.onEventSelected)
         self.reload_graph_action.triggered.connect(self.flowchart_view.reload)
+        self.export_graph_action.triggered.connect(self.flowchart_view.export)
         self.add_event_action.triggered.connect(self.flowchart_view.addNewEvent)
         self.add_fork_action.triggered.connect(self.flowchart_view.addFork)
 
