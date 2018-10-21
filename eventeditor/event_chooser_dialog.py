@@ -81,7 +81,7 @@ class EventChooserDialog(q.QDialog):
     def __init__(self, parent, flow_data: FlowData, enable_ctx_menu: bool=True) -> None:
         super().__init__(parent, qc.Qt.WindowTitleHint | qc.Qt.WindowSystemMenuHint)
         self.setWindowTitle('Choose an event')
-        self.setMinimumWidth(600)
+        self.setMinimumWidth(700)
         self.setMinimumHeight(250)
         self.flow_data = flow_data
 

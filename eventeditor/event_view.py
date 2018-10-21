@@ -33,6 +33,7 @@ class EventView(q.QWidget):
         self.event_view.horizontalHeader().setSectionResizeMode(0, q.QHeaderView.ResizeToContents)
         self.event_view.horizontalHeader().setSectionResizeMode(2, q.QHeaderView.Stretch)
         self.event_view.horizontalHeader().setSectionResizeMode(3, q.QHeaderView.ResizeToContents)
+        self.event_view.horizontalHeader().setSectionResizeMode(4, q.QHeaderView.Stretch)
 
         if self.enable_ctx_menu:
             self.event_view.setContextMenuPolicy(qc.Qt.CustomContextMenu)

@@ -72,6 +72,13 @@ def get_event_next_summary(event: evfl.event.Event) -> str:
         return f'{len(event.data.forks)} fork(s)'
     return '???'
 
+def get_event_param_list(event: evfl.event.Event) -> typing.Dict[str, typing.Any]:
+    if isinstance(event.data, evfl.event.ActionEvent) or isinstance(event.data, evfl.event.SwitchEvent) or isinstance(event.data, evfl.event.SubFlowEvent):
+        if not event.data.params:
+            return dict()
+        return event.data.params.data
+    return dict()
+
 def get_event_full_description(event: evfl.event.Event) -> str:
     info = [event.name, get_event_type(event), get_event_description(event)]
     return ' - '.join([x for x in info if (x and x != '–')])

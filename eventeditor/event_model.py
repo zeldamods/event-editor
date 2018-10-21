@@ -11,6 +11,7 @@ class EventModelColumn(IntEnum):
     Type = auto()
     Description = auto()
     Next = auto()
+    Parameters = auto()
 
 class EventModel(qc.QAbstractTableModel):
     def __init__(self, *kwargs) -> None:
@@ -54,6 +55,8 @@ class EventModel(qc.QAbstractTableModel):
             return 'Description'
         if section == EventModelColumn.Next:
             return 'Next'
+        if section == EventModelColumn.Parameters:
+            return 'Parameters'
         return 'Unknown'
 
     def data(self, index, role) -> qc.QVariant:
@@ -63,7 +66,7 @@ class EventModel(qc.QAbstractTableModel):
         if role == qc.Qt.UserRole:
             return self.l[row]
 
-        if role != qc.Qt.DisplayRole:
+        if role != qc.Qt.DisplayRole and role != qc.Qt.ToolTipRole:
             return qc.QVariant()
 
         if col == EventModelColumn.Name:
@@ -74,4 +77,10 @@ class EventModel(qc.QAbstractTableModel):
             return get_event_description(self.l[row])
         if col == EventModelColumn.Next:
             return get_event_next_summary(self.l[row])
+        if col == EventModelColumn.Parameters:
+            params = get_event_param_list(self.l[row])
+            if role == qc.Qt.DisplayRole:
+                return '; '.join([f'{k}={v}' for k, v in params.items()])
+            if role == qc.Qt.ToolTipRole:
+                return '<br>'.join([f'<b>{k}</b>: {v}' for k, v in params.items()])
         return qc.QVariant()
