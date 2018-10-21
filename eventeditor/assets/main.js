@@ -328,8 +328,40 @@ graph = new Graph();
 
 document.body.addEventListener('keydown', (event) => {
   const key = event.key; // "ArrowRight", "ArrowLeft", "ArrowUp", or "ArrowDown"
+
+  // Handle zoom
+  if (event.ctrlKey) {
+    let scaleMultiplier = 1;
+    if (key === 'ArrowUp')
+      scaleMultiplier = 1.1;
+    else if (key === 'ArrowDown')
+      scaleMultiplier = 0.9;
+    graph.renderer.setScale(graph.renderer.zoom.scale() * scaleMultiplier);
+    if (scaleMultiplier !== 1)
+      return;
+  }
+
+  // Handle translate / navigation
   const selected = graph.renderer.getSelection();
   if (selected === -1) {
+    let vDirection = 0;
+    let hDirection = 0;
+    switch (key) {
+      case 'ArrowUp':
+        vDirection = 1;
+        break;
+      case 'ArrowDown':
+        vDirection = -1;
+        break;
+      case 'ArrowLeft':
+        hDirection = 1;
+        break;
+      case 'ArrowRight':
+        hDirection = -1;
+        break;
+    }
+    const [x, y] = graph.renderer.zoom.translate();
+    graph.renderer.setTranslate([x + 100 * hDirection, y + 100 * vDirection]);
     return;
   }
   if (key === 'ArrowUp' || key === 'ArrowDown') {
