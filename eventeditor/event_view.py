@@ -9,6 +9,15 @@ import PyQt5.QtCore as qc # type: ignore
 import PyQt5.QtGui as qg # type: ignore
 import PyQt5.QtWidgets as q # type: ignore
 
+class _TableWidget(q.QTableView):
+    onEnterPressed = qc.pyqtSignal()
+    def keyPressEvent(self, event):
+        key = event.key()
+        if key == qc.Qt.Key_Return or key == qc.Qt.Key_Enter:
+            self.onEnterPressed.emit()
+        else:
+            super().keyPressEvent(event)
+
 class EventView(q.QWidget):
     jumpToFlowchartRequested = qc.pyqtSignal(int)
 
@@ -23,7 +32,7 @@ class EventView(q.QWidget):
     def initWidgets(self) -> None:
         self.event_proxy_model = qc.QSortFilterProxyModel(self)
         self.event_proxy_model.setSourceModel(self.flow_data.event_model)
-        self.event_view = q.QTableView()
+        self.event_view = _TableWidget()
         self.event_view.setModel(self.event_proxy_model)
         self.event_view.verticalHeader().hide()
         self.event_view.setSelectionBehavior(q.QAbstractItemView.SelectRows)
@@ -56,14 +65,20 @@ class EventView(q.QWidget):
         find_action.triggered.connect(self.search_bar.showAndFocus)
         self.addAction(find_action)
 
+        self.event_view.onEnterPressed.connect(self.onEnterPressed)
         self.event_view.doubleClicked.connect(lambda idx: self.jumpToFlowchartRequested.emit(self.event_proxy_model.mapToSource(idx).row()))
 
-    def getSelectedEvent(self) -> typing.Optional[Event]:
+    def getSelectedEventIdx(self) -> typing.Optional[qc.QModelIndex]:
         smodel = self.event_view.selectionModel()
         if not smodel.hasSelection():
             return None
-        sidx = smodel.selectedRows()[0]
-        return self.event_proxy_model.mapToSource(sidx).data(qc.Qt.UserRole)
+        return self.event_proxy_model.mapToSource(smodel.selectedRows()[0])
+
+    def getSelectedEvent(self) -> typing.Optional[Event]:
+        source_idx = self.getSelectedEventIdx()
+        if not source_idx:
+            return None
+        return source_idx.data(qc.Qt.UserRole)
 
     def selectEvent(self, event_idx: int) -> None:
         model = self.flow_data.event_model
@@ -85,3 +100,8 @@ class EventView(q.QWidget):
         menu.addAction('&Edit...', lambda: self.editEvent(source_idx.row()))
         menu.addAction('&Jump to flowchart', lambda: self.jumpToFlowchartRequested.emit(source_idx.row()))
         menu.exec_(self.sender().viewport().mapToGlobal(pos))
+
+    def onEnterPressed(self) -> None:
+        selected_idx = self.getSelectedEventIdx()
+        if selected_idx:
+            self.jumpToFlowchartRequested.emit(selected_idx.row())
