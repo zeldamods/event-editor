@@ -50,7 +50,7 @@ class EventView(q.QWidget):
 
     def connectWidgets(self) -> None:
         self.event_proxy_model.setFilterKeyColumn(-1)
-        self.search_bar.textChanged.connect(self.event_proxy_model.setFilterFixedString)
+        self.search_bar.connectToFilterModel(self.event_proxy_model)
         find_action = q.QAction(self)
         find_action.setShortcut(qg.QKeySequence.Find)
         find_action.triggered.connect(self.search_bar.showAndFocus)

@@ -4,6 +4,7 @@ import PyQt5.QtWidgets as q # type: ignore
 
 class SearchBar(q.QWidget):
     textChanged = qc.pyqtSignal(str)
+    caseInsensitiveChanged = qc.pyqtSignal(bool)
 
     def __init__(self, *args) -> None:
         super().__init__(*args)
@@ -14,9 +15,13 @@ class SearchBar(q.QWidget):
         self.box = q.QLineEdit()
         self.box.setPlaceholderText('Search…')
 
+        self.caseInsensitiveCbox = q.QCheckBox('Case insensitive')
+        self.caseInsensitiveCbox.setChecked(True)
+
         layout = q.QHBoxLayout(self)
         layout.addWidget(self.close_btn)
         layout.addWidget(self.box)
+        layout.addWidget(self.caseInsensitiveCbox)
         layout.setStretch(1, 1)
         layout.setContentsMargins(5, 5, 5, 5)
 
@@ -28,6 +33,8 @@ class SearchBar(q.QWidget):
 
         self.box.textChanged.connect(self.textChanged)
 
+        self.caseInsensitiveCbox.stateChanged.connect(lambda state: self.caseInsensitiveChanged.emit(state == qc.Qt.Checked))
+
     def hideAndClear(self) -> None:
         self.close()
         self.box.clear()
@@ -38,3 +45,10 @@ class SearchBar(q.QWidget):
 
     def setValue(self, value: str) -> None:
         self.box.setText(value)
+
+    def connectToFilterModel(self, model) -> None:
+        self.textChanged.connect(model.setFilterFixedString)
+        def setModelFilterCaseSensitivity(insensitive: bool) -> None:
+            model.setFilterCaseSensitivity(qc.Qt.CaseInsensitive if insensitive else qc.Qt.CaseSensitive)
+        self.caseInsensitiveChanged.connect(setModelFilterCaseSensitivity)
+        setModelFilterCaseSensitivity(self.caseInsensitiveCbox.isChecked())

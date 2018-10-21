@@ -235,7 +235,6 @@ class FlowchartView(q.QWidget):
         self.ep_proxy_model = qc.QSortFilterProxyModel(self)
         self.ep_proxy_model.setSourceModel(self.flow_data.entry_point_model)
         self.ep_proxy_model.setFilterKeyColumn(-1)
-        self.ep_proxy_model.setFilterCaseSensitivity(qc.Qt.CaseInsensitive)
         self.entry_point_view.setModel(self.ep_proxy_model)
         self.ep_search = SearchBar()
         self.ep_search.hide()
@@ -270,7 +269,7 @@ class FlowchartView(q.QWidget):
         layout.setContentsMargins(0, 0, 0, 0)
 
     def connectWidgets(self) -> None:
-        self.ep_search.textChanged.connect(self.ep_proxy_model.setFilterFixedString)
+        self.ep_search.connectToFilterModel(self.ep_proxy_model)
         find_action = q.QAction(self)
         find_action.setShortcut(qg.QKeySequence.Find)
         find_action.triggered.connect(self.ep_search.showAndFocus)
