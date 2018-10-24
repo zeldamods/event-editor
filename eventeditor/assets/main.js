@@ -41,7 +41,8 @@ function getNodeLabel(node) {
       if (!isWhitelisted && i >= 5) {
         hasMore = true;
       } else {
-        label += `\n${key}: ${value}`;
+        const valueStr = typeof value === 'number' ? value.toFixed(6).replace(/\.?0*$/, '') : value;
+        label += `\n${key}: ${valueStr}`;
       }
       i++;
     }
