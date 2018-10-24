@@ -329,6 +329,11 @@ graph = new Graph();
 document.body.addEventListener('keydown', (event) => {
   const key = event.key; // "ArrowRight", "ArrowLeft", "ArrowUp", or "ArrowDown"
 
+  if (key === 'Escape') {
+    graph.renderer.clearSelection();
+    return;
+  }
+
   // Handle zoom
   if (event.ctrlKey) {
     let scaleMultiplier = 1;
