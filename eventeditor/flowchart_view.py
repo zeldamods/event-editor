@@ -14,33 +14,12 @@ from evfl import Container, Flowchart, Actor, Event, EventFlow, ActionEvent, Swi
 from evfl.common import Index, RequiredIndex
 from evfl.entry_point import EntryPoint
 from evfl.enums import EventType
-from evfl.util import make_values_to_index_map
+from evfl.repr_util import generate_flowchart_graph
 from PyQt5.QtWebChannel import QWebChannel # type: ignore
 from PyQt5.QtWebEngineWidgets import QWebEngineView # type: ignore
 import PyQt5.QtCore as qc # type: ignore
 import PyQt5.QtGui as qg # type: ignore
 import PyQt5.QtWidgets as q # type: ignore
-
-class GraphBuilder:
-    def __init__(self) -> None:
-        self.elements: list = []
-
-    def addNode(self, node_id: int, node_type: str, data = dict()) -> int:
-        self.elements.append({
-            'type': 'node',
-            'id': node_id,
-            'data': data,
-            'node_type': node_type,
-        })
-        return node_id
-
-    def addEdge(self, source: int, target: int, data = dict()) -> None:
-        self.elements.append({
-            'type': 'edge',
-            'source': source,
-            'target': target,
-            'data': data,
-        })
 
 class FlowchartWebObject(qc.QObject):
     flowDataChanged = qc.pyqtSignal()
@@ -57,95 +36,11 @@ class FlowchartWebObject(qc.QObject):
 
     @qc.pyqtSlot(result=qc.QVariant)
     def getJson(self) -> qc.QVariant:
-        return qc.QVariant(self.getData())
+        return qc.QVariant(json.loads(json.dumps(self.getData(), default=lambda x: str(x))))
 
     def getData(self) -> list:
         flow = self.view.flow_data.flow
-        if not flow or not flow.flowchart:
-            return list()
-
-        actors = flow.flowchart.actors
-        events = flow.flowchart.events
-        builder = GraphBuilder()
-        visited: typing.Set[Event] = set()
-
-        event_idx_map = make_values_to_index_map(events)
-
-        def handleNextEvent(nid, next_event: typing.Optional[Event], join_stack: typing.List[Event]) -> None:
-            if not next_event:
-                if join_stack:
-                    builder.addEdge(nid, event_idx_map[join_stack[-1]], {'virtual': True})
-                return
-            builder.addEdge(nid, event_idx_map[next_event])
-            traverse(next_event, join_stack)
-
-        def traverse(event: Event, join_stack: typing.List[Event]) -> None:
-            if event in visited:
-                return
-            visited.add(event)
-            data = event.data
-
-            if isinstance(data, ActionEvent):
-                nid = builder.addNode(event_idx_map[event], 'action', {
-                    'actor': str(data.actor.v.identifier),
-                    'action': str(data.actor_action.v),
-                    'name': event.name,
-                    'params': data.params.data if data.params else None,
-                })
-                handleNextEvent(nid, data.nxt.v, join_stack)
-
-            elif isinstance(data, SwitchEvent):
-                nid = builder.addNode(event_idx_map[event], 'switch', {
-                    'actor': str(data.actor.v.identifier),
-                    'query': str(data.actor_query.v),
-                    'name': event.name,
-                    'params': data.params.data if data.params else None,
-                })
-                for value, case in data.cases.items():
-                    builder.addEdge(nid, event_idx_map[case.v], {'value': value})
-                    traverse(case.v, join_stack)
-                if join_stack and not (len(data.cases) == 2 and 0 in data.cases and 1 in data.cases):
-                    builder.addEdge(nid, event_idx_map[join_stack[-1]], {'virtual': True})
-
-            elif isinstance(data, ForkEvent):
-                nid = builder.addNode(event_idx_map[event], 'fork', {'name': event.name})
-                join_stack.append(data.join.v)
-                for fork in data.forks:
-                    builder.addEdge(nid, event_idx_map[fork.v])
-                    traverse(fork.v, join_stack)
-                traverse(data.join.v, join_stack)
-
-            elif isinstance(data, JoinEvent):
-                join_stack.pop()
-                nid = builder.addNode(event_idx_map[event], 'join', {'name': event.name})
-                handleNextEvent(nid, data.nxt.v, join_stack)
-
-            elif isinstance(data, SubFlowEvent):
-                nid = builder.addNode(event_idx_map[event], 'sub_flow', {
-                    'res_flowchart_name': data.res_flowchart_name,
-                    'entry_point_name': data.entry_point_name,
-                    'name': event.name,
-                    'params': data.params.data if data.params else None,
-                })
-                handleNextEvent(nid, data.nxt.v, join_stack)
-
-        for i, entry in enumerate(flow.flowchart.entry_points):
-            builder.addNode(-1000-i, 'entry', {'name': entry.name})
-            builder.addEdge(-1000-i, event_idx_map[entry.main_event.v])
-            traverse(entry.main_event.v, [])
-
-        # Add events that are not linked from any entry point.
-        try:
-            for event in flow.flowchart.events:
-                if event in visited:
-                    continue
-                traverse(event, [])
-        except IndexError as e:
-            q.QMessageBox.critical(self.view, 'Bug', f'An error has occurred while generating graph data: {e}\n\nThe graph may be incomplete. Please report this issue and mention what you did before this message showed up.')
-
-        # Manually convert to JSON to ensure custom types are handled in a sane way.
-        # (It seems QVariant cannot handle the Argument class and always replaces it with null.)
-        return json.loads(json.dumps(builder.elements, default=lambda x: str(x)))
+        return generate_flowchart_graph(flow) if flow else []
 
     @qc.pyqtSlot()
     def emitReadySignal(self):
@@ -302,7 +197,7 @@ class FlowchartView(q.QWidget):
         data = self.web_object.getData()
         try:
             with open(path, 'w') as f:
-                json.dump(data, f)
+                json.dump(data, f, default=lambda x: str(x))
         except:
             q.QMessageBox.critical(self, 'Export graph data', 'Failed to write to ' + path)
 
