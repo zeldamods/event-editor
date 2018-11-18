@@ -135,10 +135,15 @@ class ActorRelatedEventEditDialog(q.QDialog):
         attr = getattr(self.event.data, self.attr_name)
         attr.v = new_attr
 
+        reason = FlowDataChangeReason.Unknown
+        if previous_actor != new_actor or previous_attr != new_attr:
+            reason |= FlowDataChangeReason.Events
+        if self.event.data.params.data != self.modified_params.data:
+            reason |= FlowDataChangeReason.EventParameters
+
         self.event.data.params = self.modified_params
 
-        self.flow_data.reload_flowchart_needed = previous_actor != new_actor or previous_attr != new_attr
-        self.flow_data.flowDataChanged.emit(FlowDataChangeReason.Events)
+        self.flow_data.flowDataChanged.emit(reason)
         super().accept()
 
 class SubFlowEventEditDialog(q.QDialog):
@@ -184,15 +189,20 @@ class SubFlowEventEditDialog(q.QDialog):
             q.QMessageBox.critical(self, 'Invalid data', 'The entry point name cannot be empty.')
             return
 
-        self.event.data.params = self.modified_params
-
         prev_flowchart = self.event.data.res_flowchart_name
         prev_ep = self.event.data.entry_point_name
         self.event.data.res_flowchart_name = new_flowchart
         self.event.data.entry_point_name = new_ep
 
-        self.flow_data.reload_flowchart_needed = prev_flowchart != new_flowchart or prev_ep != new_ep
-        self.flow_data.flowDataChanged.emit(FlowDataChangeReason.Events)
+        reason = FlowDataChangeReason.Unknown
+        if prev_flowchart != new_flowchart or prev_ep != new_ep:
+            reason |= FlowDataChangeReason.Events
+        if self.event.data.params.data != self.modified_params.data:
+            reason |= FlowDataChangeReason.EventParameters
+
+        self.event.data.params = self.modified_params
+
+        self.flow_data.flowDataChanged.emit(reason)
         super().accept()
 
 def make_event_edit_dialog(parent, flow_data: FlowData, idx: int) -> typing.Optional[q.QDialog]:

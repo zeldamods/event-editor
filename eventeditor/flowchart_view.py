@@ -109,6 +109,7 @@ class FlowchartView(q.QWidget):
         self.flow_data: FlowData = flow_data
         self.is_current = True
         self.selected_event: typing.Optional[Event] = None
+        self.showEventParams = False
         self.initWidgets()
         self.initLayout()
         self.connectWidgets()
@@ -119,6 +120,7 @@ class FlowchartView(q.QWidget):
         self.flow_data.fileLoaded.connect(self.web_object.fileLoaded)
         self.selectRequested.connect(self.web_object.selectRequested)
         self.eventNameVisibilityChanged.connect(self.web_object.eventNameVisibilityChanged)
+        self.eventParamVisibilityChanged.connect(self.onEventParamVisibilityChanged)
         self.eventParamVisibilityChanged.connect(self.web_object.eventParamVisibilityChanged)
 
         self.view = QWebEngineView()
@@ -173,11 +175,14 @@ class FlowchartView(q.QWidget):
         self.flow_data.flowDataChanged.connect(lambda reason: self.entry_point_view.clearSelection())
         self.entry_point_view.selectionModel().selectionChanged.connect(self.onEntryPointSelected)
 
-        connect_model_change_signals(self.container_model, self.flow_data, FlowDataChangeReason.EventParameters, reload_flowchart_needed=False)
+        connect_model_change_signals(self.container_model, self.flow_data, FlowDataChangeReason.EventParameters)
         self.eventSelected.connect(self.onEventSelectedInWebView)
         self.flow_data.flowDataChanged.connect(lambda reason: self.refreshParamModel())
 
         self.reloadedSignal.connect(self.onWebViewReloaded)
+
+    def onEventParamVisibilityChanged(self, show: bool) -> None:
+        self.showEventParams = show
 
     def setIsCurrentView(self, is_current: bool) -> None:
         self.is_current = is_current
@@ -234,7 +239,10 @@ class FlowchartView(q.QWidget):
         self.container_stacked_widget.setCurrentIndex(0)
 
     def onFlowDataChanged(self, reason: FlowDataChangeReason) -> None:
-        if not self.flow_data.reload_flowchart_needed:
+        should_reload = bool(reason & (FlowDataChangeReason.Reset|FlowDataChangeReason.Actors|FlowDataChangeReason.Events))
+        if self.showEventParams:
+            should_reload = should_reload or bool(reason & FlowDataChangeReason.EventParameters)
+        if not should_reload:
             return
         if self.is_current:
             self.web_object.flowDataChanged.emit()

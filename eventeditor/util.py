@@ -141,11 +141,9 @@ def is_actor_string_in_use(events: typing.List[evfl.event.Event], value: evfl.co
                 return True
     return False
 
-def connect_model_change_signals(model, flow_data, change_reason, reload_flowchart_needed: bool = True) -> None:
+def connect_model_change_signals(model, flow_data, change_reason) -> None:
     def emit(*_) -> None:
-        flow_data.reload_flowchart_needed = reload_flowchart_needed
         flow_data.flowDataChanged.emit(change_reason)
-        flow_data.reload_flowchart_needed = True
 
     model.dataChanged.connect(emit)
     model.rowsInserted.connect(emit)

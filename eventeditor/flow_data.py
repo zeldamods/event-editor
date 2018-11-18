@@ -10,6 +10,7 @@ import re
 import typing
 
 class FlowDataChangeReason(enum.Flag):
+    Unknown = enum.auto()
     Reset = enum.auto()
     Actors = enum.auto()
     Events = enum.auto()
@@ -28,7 +29,6 @@ class FlowData(qc.QObject):
         self.flowDataChanged.connect(lambda reason: self.auto_save.save(self.flow))
 
         self.flow: typing.Optional[EventFlow] = None
-        self.reload_flowchart_needed = True
 
         self.actor_model = ActorModel()
         self.entry_point_model = EntryPointModel()
