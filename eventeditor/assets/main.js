@@ -144,7 +144,6 @@ class Renderer {
       if ((new Date() - this.lastZoomEventStart) >= 100) {
         return;
       }
-      widget.emitEventSelectedSignal(-1);
       this.clearSelection();
     });
   }
@@ -155,6 +154,11 @@ class Renderer {
   }
 
   clearSelection() {
+    widget.emitEventSelectedSignal(-1);
+    this.clearSelectionWithoutEmittingSignal();
+  }
+
+  clearSelectionWithoutEmittingSignal() {
     const selected = this.getSelection();
     if (selected !== -1) {
       const node = graph.g.node(selected);
@@ -166,7 +170,7 @@ class Renderer {
   }
 
   select(id, g) {
-    this.clearSelection();
+    this.clearSelectionWithoutEmittingSignal();
     d3.select(`#n${id}`).classed('selected', true);
     g.node(id).class += ' selected';
     g.inEdges(id).forEach((e) => {
