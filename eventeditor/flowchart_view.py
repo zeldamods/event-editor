@@ -168,10 +168,7 @@ class FlowchartView(q.QWidget):
 
     def connectWidgets(self) -> None:
         self.ep_search.connectToFilterModel(self.ep_proxy_model)
-        find_action = q.QAction(self)
-        find_action.setShortcut(qg.QKeySequence.Find)
-        find_action.triggered.connect(self.ep_search.showAndFocus)
-        self.addAction(find_action)
+        self.ep_search.addFindShortcut(self)
 
         self.flow_data.flowDataChanged.connect(self.entry_point_view.clearSelection)
         self.entry_point_view.selectionModel().selectionChanged.connect(self.onEntryPointSelected)

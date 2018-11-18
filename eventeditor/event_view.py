@@ -60,10 +60,7 @@ class EventView(q.QWidget):
     def connectWidgets(self) -> None:
         self.event_proxy_model.setFilterKeyColumn(-1)
         self.search_bar.connectToFilterModel(self.event_proxy_model)
-        find_action = q.QAction(self)
-        find_action.setShortcut(qg.QKeySequence.Find)
-        find_action.triggered.connect(self.search_bar.showAndFocus)
-        self.addAction(find_action)
+        self.search_bar.addFindShortcut(self)
 
         self.event_view.onEnterPressed.connect(self.onEnterPressed)
         self.event_view.doubleClicked.connect(lambda idx: self.jumpToFlowchartRequested.emit(self.event_proxy_model.mapToSource(idx).row()))

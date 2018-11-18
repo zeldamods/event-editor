@@ -46,6 +46,12 @@ class SearchBar(q.QWidget):
     def setValue(self, value: str) -> None:
         self.box.setText(value)
 
+    def addFindShortcut(self, widget) -> None:
+        find_action = q.QAction(widget)
+        find_action.setShortcut(qg.QKeySequence.Find)
+        find_action.triggered.connect(self.showAndFocus)
+        widget.addAction(find_action)
+
     def connectToFilterModel(self, model) -> None:
         self.textChanged.connect(model.setFilterFixedString)
         def setModelFilterCaseSensitivity(insensitive: bool) -> None:
