@@ -6,6 +6,7 @@ from eventeditor.actor_string_list_model import ActorStringListModel
 from eventeditor.actor_string_list_view import ActorActionListView, ActorQueryListView
 from eventeditor.container_model import ContainerModel
 from eventeditor.container_view import ContainerView
+from eventeditor.flow_data import FlowDataChangeReason
 import eventeditor.util as util
 from evfl import EventFlow, Actor, ActorIdentifier
 from evfl.entry_point import EntryPoint
@@ -139,9 +140,9 @@ class ActorDetailPane(q.QWidget):
         layout.setContentsMargins(0, 0, 0, 0)
 
     def connectWidgets(self) -> None:
-        util.connect_model_change_signals(self.action_model, self.flow_data)
-        util.connect_model_change_signals(self.query_model, self.flow_data)
-        util.connect_model_change_signals(self.container_model, self.flow_data)
+        util.connect_model_change_signals(self.action_model, self.flow_data, FlowDataChangeReason.Actors)
+        util.connect_model_change_signals(self.query_model, self.flow_data, FlowDataChangeReason.Actors)
+        util.connect_model_change_signals(self.container_model, self.flow_data, FlowDataChangeReason.Actors)
 
         self.action_view.addActionBuilder(lambda menu, idx: menu.addAction('&Jump to events', lambda: self.onJumpToEvents(idx)))
         self.query_view.addActionBuilder(lambda menu, idx: menu.addAction('&Jump to events', lambda: self.onJumpToEvents(idx)))

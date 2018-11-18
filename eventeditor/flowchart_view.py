@@ -7,7 +7,7 @@ from eventeditor.event_branch_editors import SwitchEventEditDialog, ForkEventEdi
 from eventeditor.event_edit_dialog import show_event_editor
 from eventeditor.event_chooser_dialog import show_event_type_chooser, add_new_event, EventChooserDialog, CheckableEventParentListWidget
 from eventeditor.event_fork_chooser_dialog import EventForkChooserDialog
-from eventeditor.flow_data import FlowData
+from eventeditor.flow_data import FlowData, FlowDataChangeReason
 from eventeditor.search_bar import SearchBar
 from eventeditor.util import *
 from evfl import Container, Flowchart, Actor, Event, EventFlow, ActionEvent, SwitchEvent, ForkEvent, JoinEvent, SubFlowEvent
@@ -170,12 +170,12 @@ class FlowchartView(q.QWidget):
         self.ep_search.connectToFilterModel(self.ep_proxy_model)
         self.ep_search.addFindShortcut(self)
 
-        self.flow_data.flowDataChanged.connect(self.entry_point_view.clearSelection)
+        self.flow_data.flowDataChanged.connect(lambda reason: self.entry_point_view.clearSelection())
         self.entry_point_view.selectionModel().selectionChanged.connect(self.onEntryPointSelected)
 
-        connect_model_change_signals(self.container_model, self.flow_data, reload_flowchart_needed=False)
+        connect_model_change_signals(self.container_model, self.flow_data, FlowDataChangeReason.EventParameters, reload_flowchart_needed=False)
         self.eventSelected.connect(self.onEventSelectedInWebView)
-        self.flow_data.flowDataChanged.connect(self.refreshParamModel)
+        self.flow_data.flowDataChanged.connect(lambda reason: self.refreshParamModel())
 
         self.reloadedSignal.connect(self.onWebViewReloaded)
 
@@ -233,7 +233,7 @@ class FlowchartView(q.QWidget):
         self.container_model.set(None)
         self.container_stacked_widget.setCurrentIndex(0)
 
-    def onFlowDataChanged(self) -> None:
+    def onFlowDataChanged(self, reason: FlowDataChangeReason) -> None:
         if not self.flow_data.reload_flowchart_needed:
             return
         if self.is_current:
@@ -308,7 +308,7 @@ class FlowchartView(q.QWidget):
             return
 
         self._doAddEventAbove(list_widget.getSelectedEvents(), event, new_parent)
-        self.flow_data.flowDataChanged.emit()
+        self.flow_data.flowDataChanged.emit(FlowDataChangeReason.Events)
         self.delayedSelect(new_parent)
 
     def _doAddEventAbove(self, parents: typing.List[typing.Tuple[Event, typing.List[typing.Any]]], event: Event, new_parent: Event) -> None:
@@ -366,7 +366,7 @@ class FlowchartView(q.QWidget):
 
         event.data.nxt.v = target
 
-        self.flow_data.flowDataChanged.emit()
+        self.flow_data.flowDataChanged.emit(FlowDataChangeReason.Events)
         self.delayedSelect(target)
 
     def webLink(self, event_idx: int) -> None:
@@ -387,7 +387,7 @@ class FlowchartView(q.QWidget):
             q.QMessageBox.critical(self, 'Invalid choice', 'Cannot link an event to itself. Please choose another event and try again.')
             return
         event.data.nxt.v = target # type: ignore
-        self.flow_data.flowDataChanged.emit()
+        self.flow_data.flowDataChanged.emit(FlowDataChangeReason.Events)
         self.delayedSelect(target)
 
     def webUnlink(self, event_idx: int) -> None:
@@ -398,7 +398,7 @@ class FlowchartView(q.QWidget):
         assert self.flow_data.flow and self.flow_data.flow.flowchart
         event = self.flow_data.flow.flowchart.events[event_idx]
         event.data.nxt.v = None # type: ignore
-        self.flow_data.flowDataChanged.emit()
+        self.flow_data.flowDataChanged.emit(FlowDataChangeReason.Events)
         self.delayedSelect(event)
 
     def _findForkEventLeafNodes(self, starting_event: Event) -> typing.List[Event]:
@@ -509,7 +509,7 @@ class FlowchartView(q.QWidget):
         # Since we're editing the array directly, a model reset MUST be triggered.
         self.flow_data.event_model.set(self.flow_data.flow)
 
-        self.flow_data.flowDataChanged.emit()
+        self.flow_data.flowDataChanged.emit(FlowDataChangeReason.Events)
 
     def webEditSwitchBranches(self, event_idx: int) -> None:
         if event_idx < 0:
@@ -594,4 +594,4 @@ class FlowchartView(q.QWidget):
 
         # Trigger a full model reset since we updated the underlying array directly.
         self.flow_data.event_model.set(self.flow_data.flow)
-        self.flow_data.flowDataChanged.emit()
+        self.flow_data.flowDataChanged.emit(FlowDataChangeReason.Events)

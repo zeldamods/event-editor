@@ -5,7 +5,7 @@ import eventeditor.ai as ai
 from eventeditor.actor_string_list_model import ActorStringListModel
 from eventeditor.container_model import ContainerModel
 from eventeditor.container_view import ContainerView
-from eventeditor.flow_data import FlowData
+from eventeditor.flow_data import FlowData, FlowDataChangeReason
 import eventeditor.util as util
 from evfl import Container, Actor, Event
 from evfl.enums import EventType
@@ -44,7 +44,7 @@ class ActorRelatedEventEditDialog(q.QDialog):
         self.modified_params: Container = copy.deepcopy(self.event.data.params)
         self.param_model.set(self.modified_params)
         self.attr_model = ActorStringListModel(self, [])
-        util.connect_model_change_signals(self.attr_model, self.flow_data)
+        util.connect_model_change_signals(self.attr_model, self.flow_data, FlowDataChangeReason.Actors)
 
         self.createActorCbox()
         self.createAttrCbox()
@@ -138,7 +138,7 @@ class ActorRelatedEventEditDialog(q.QDialog):
         self.event.data.params = self.modified_params
 
         self.flow_data.reload_flowchart_needed = previous_actor != new_actor or previous_attr != new_attr
-        self.flow_data.flowDataChanged.emit()
+        self.flow_data.flowDataChanged.emit(FlowDataChangeReason.Events)
         super().accept()
 
 class SubFlowEventEditDialog(q.QDialog):
@@ -192,7 +192,7 @@ class SubFlowEventEditDialog(q.QDialog):
         self.event.data.entry_point_name = new_ep
 
         self.flow_data.reload_flowchart_needed = prev_flowchart != new_flowchart or prev_ep != new_ep
-        self.flow_data.flowDataChanged.emit()
+        self.flow_data.flowDataChanged.emit(FlowDataChangeReason.Events)
         super().accept()
 
 def make_event_edit_dialog(parent, flow_data: FlowData, idx: int) -> typing.Optional[q.QDialog]:

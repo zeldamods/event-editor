@@ -2,7 +2,7 @@ from enum import IntEnum, auto
 import typing
 
 from eventeditor.event_chooser_dialog import EventChooserDialog
-from eventeditor.flow_data import FlowData
+from eventeditor.flow_data import FlowData, FlowDataChangeReason
 import eventeditor.util as util
 from evfl import Event
 from evfl.common import RequiredIndex
@@ -208,7 +208,7 @@ class SwitchEventEditDialog(q.QDialog):
             return
 
         self.model.updateCaseDict(self.orig_cases)
-        self.flow_data.flowDataChanged.emit()
+        self.flow_data.flowDataChanged.emit(FlowDataChangeReason.Events)
         super().accept()
 
     def addCase(self) -> None:
@@ -357,7 +357,7 @@ class ForkEventEditDialog(q.QDialog):
             return
 
         self.model.updateForkList(self.orig_forks)
-        self.flow_data.flowDataChanged.emit()
+        self.flow_data.flowDataChanged.emit(FlowDataChangeReason.Events)
         super().accept()
 
     def addFork(self) -> None:

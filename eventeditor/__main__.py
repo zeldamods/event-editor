@@ -11,7 +11,7 @@ from evfl import EventFlow
 import eventeditor.ai as ai
 from eventeditor.actor_view import ActorView
 from eventeditor.event_view import EventView
-from eventeditor.flow_data import FlowData
+from eventeditor.flow_data import FlowData, FlowDataChangeReason
 from eventeditor.flowchart_view import FlowchartView
 import eventeditor.util as util
 import PyQt5.QtCore as qc # type: ignore
@@ -143,8 +143,8 @@ class MainWindow(q.QMainWindow):
     def connectWidgets(self) -> None:
         def set_unsaved_flag():
             self.unsaved = True
-        self.flow_data.flowDataChanged.connect(set_unsaved_flag)
-        self.flow_data.flowDataChanged.connect(self.updateTitleAndActions)
+        self.flow_data.flowDataChanged.connect(lambda reason: set_unsaved_flag())
+        self.flow_data.flowDataChanged.connect(lambda reason: self.updateTitleAndActions())
 
         self.flowchart_view.readySignal.connect(self.onViewReady)
         self.flowchart_view.eventSelected.connect(self.onEventSelected)
@@ -226,7 +226,7 @@ class MainWindow(q.QMainWindow):
             return
         self.flow.name = text
         self.flow.flowchart.name = text
-        self.flow_data.flowDataChanged.emit()
+        self.flow_data.flowDataChanged.emit(FlowDataChangeReason.EventFlowRename)
 
     def readFlow(self, path: str) -> bool:
         if self.flow and self.unsaved:
