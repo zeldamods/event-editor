@@ -148,6 +148,13 @@ class ActorDetailPane(q.QWidget):
 
         self.action_view.addActionBuilder(lambda menu, idx: menu.addAction('&Jump to events', lambda: self.onJumpToEvents(idx)))
         self.query_view.addActionBuilder(lambda menu, idx: menu.addAction('&Jump to events', lambda: self.onJumpToEvents(idx)))
+        self.container_view.addActionBuilder(lambda menu, idx: menu.addAction('&Add default create parameters', lambda: self.addDefaultCreateParameters()))
+
+    def addDefaultCreateParameters(self) -> None:
+        if not self.actor or not self.actor.params:
+            return
+        self.actor.params.data.update({'CreateMode': 0, 'IsGrounding': False, 'IsWorld': False, 'PosX': 0.0, 'PosY': 0.0, 'PosZ': 0.0, 'RotX': 0.0, 'RotY': 0.0, 'RotZ': 0.0})
+        self.container_model.set(self.actor.params)
 
     def onJumpToEvents(self, idx) -> None:
         if self.actor:
