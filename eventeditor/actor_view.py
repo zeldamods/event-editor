@@ -8,7 +8,7 @@ from eventeditor.container_model import ContainerModel
 from eventeditor.container_view import ContainerView
 from eventeditor.flow_data import FlowDataChangeReason
 import eventeditor.util as util
-from evfl import EventFlow, Actor, ActorIdentifier
+from evfl import Container, EventFlow, Actor, ActorIdentifier
 from evfl.entry_point import EntryPoint
 import PyQt5.QtCore as qc # type: ignore
 import PyQt5.QtWidgets as q # type: ignore
@@ -121,6 +121,8 @@ class ActorDetailPane(q.QWidget):
         self.actor = actor
         self.action_model.set(self.actor.actions if self.actor else [])
         self.query_model.set(self.actor.queries if self.actor else [])
+        if self.actor and not self.actor.params:
+            self.actor.params = Container()
         self.container_model.set(self.actor.params if self.actor else None)
         if self.actor:
             self.action_view.setActor(self.actor)
