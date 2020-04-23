@@ -5,7 +5,7 @@ import functools
 import os
 from pathlib import Path
 import typing
-import wszst_yaz0
+import syaz0
 
 _rom_path: typing.Optional[Path] = None
 def set_rom_path(p: typing.Optional[str]) -> None:
@@ -123,8 +123,9 @@ class AIDef:
         if self._ai_defs or not _rom_path:
             return
 
-        raw_data = wszst_yaz0.decompress_file(
-            str(_rom_path / 'Pack/Bootup.pack/Actor/AIDef/AIDef_Game.product.sbyml'))
+        raw_data = syaz0.decompress(
+            (_rom_path / 'Pack/Bootup.pack/Actor/AIDef/AIDef_Game.product.sbyml').read_bytes()
+        )
         defs = byml.Byml(raw_data).parse()
         if isinstance(defs, dict):
             self._ai_defs = defs

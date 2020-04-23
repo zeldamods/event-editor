@@ -22,7 +22,15 @@ setuptools.setup(
         "Programming Language :: Python :: 3 :: Only",
     ],
     include_package_data=True,
-    install_requires=['evfl~=1.1', 'PyYAML~=5.1', 'aamp~=1.0', 'byml~=2.0', 'wszst_yaz0~=1.1'],
+    install_requires=[
+        'evfl~=1.1',
+        'pyqt5-sip~=12.7',
+        'pyqtwebengine~=5.14',
+        'PyYAML~=5.1',
+        'aamp~=1.0',
+        'byml~=2.0',
+        'syaz0~=1.0.1',
+    ],
     python_requires='>=3.6',
     entry_points={
         'gui_scripts': [
