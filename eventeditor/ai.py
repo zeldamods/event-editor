@@ -5,7 +5,7 @@ import functools
 import os
 from pathlib import Path
 import typing
-import syaz0
+import oead
 
 _rom_path: typing.Optional[Path] = None
 def set_rom_path(p: typing.Optional[str]) -> None:
@@ -123,7 +123,7 @@ class AIDef:
         if self._ai_defs or not _rom_path:
             return
 
-        raw_data = syaz0.decompress(
+        raw_data = oead.yaz0.decompress(
             (_rom_path / 'Pack/Bootup.pack/Actor/AIDef/AIDef_Game.product.sbyml').read_bytes()
         )
         defs = byml.Byml(raw_data).parse()
