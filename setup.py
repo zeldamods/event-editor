@@ -29,7 +29,7 @@ setuptools.setup(
         'PyYAML~=5.1',
         'aamp~=1.0',
         'byml~=2.0',
-        'oead~=1.1.2',
+        'oead~=1.1',
     ],
     python_requires='>=3.6',
     entry_points={
