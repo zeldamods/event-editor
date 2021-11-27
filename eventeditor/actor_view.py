@@ -200,7 +200,7 @@ class ActorView(q.QWidget):
         self.stacked_pane.addWidget(q.QWidget())
         self.stacked_pane.addWidget(self.detail_pane)
         splitter.addWidget(self.stacked_pane)
-        splitter.setSizes([splitter.height() * 0.6, splitter.height() * 0.4])
+        splitter.setSizes([int(splitter.height() * 0.6), int(splitter.height() * 0.4)])
         layout = q.QVBoxLayout(self)
         layout.addLayout(self.top_box)
         layout.addWidget(splitter, stretch=1)

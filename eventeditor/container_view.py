@@ -58,7 +58,7 @@ class ContainerAddItemDialog(q.QDialog):
 
         self.tedit = q.QPlainTextEdit()
         font = qg.QFontDatabase.systemFont(qg.QFontDatabase.FixedFont)
-        font.setPointSize(font.pointSize() * 1.05)
+        font.setPointSize(int(font.pointSize() * 1.05))
         self.tedit.setFont(font)
         self.tedit.setPlaceholderText('Item data (YAML)\nExamples:\n[1, 2, 3]\n3.1415\ntrue')
         self.value_widget.addWidget(self.tedit)

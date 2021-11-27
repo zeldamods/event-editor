@@ -47,7 +47,7 @@ class ArrayEditDialog(q.QDialog):
         label = q.QLabel('New array data:')
         self.tedit = q.QPlainTextEdit()
         font = qg.QFontDatabase.systemFont(qg.QFontDatabase.FixedFont)
-        font.setPointSize(font.pointSize() * 1.05)
+        font.setPointSize(int(font.pointSize() * 1.05))
         self.tedit.setFont(font)
         self.tedit.setPlainText(yaml.dump(self.data, allow_unicode=True, Dumper=yaml.SafeDumper))
 
