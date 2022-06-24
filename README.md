@@ -25,6 +25,8 @@ The configuration file is stored:
 
 ### Known issues
 
+* On Linux, if the main window view is a completely blank screen, even after opening a file, try running `QTWEBENGINE_DISABLE_SANDBOX=1 eventeditor` to start the tool.
+
 * Unlinking events while in fork/join will break graph generation most of the time. So using that option is not recommended when fork/join events are involved.
 
 ### What needs to be done
