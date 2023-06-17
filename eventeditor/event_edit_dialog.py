@@ -10,9 +10,17 @@ import eventeditor.util as util
 from evfl import Container, Actor, Event
 from evfl.enums import EventType
 import evfl.event
+import json
+from pathlib import Path
 import PyQt5.QtCore as qc # type: ignore
 import PyQt5.QtGui as qg # type: ignore
 import PyQt5.QtWidgets as q # type: ignore
+
+_json_path: typing.Optional[Path] = None
+def set_json_path(p: typing.Optional[str]) -> None:
+    if p:
+        global _json_path
+        _json_path = Path(p)
 
 class ActorProxyModel(qc.QIdentityProxyModel):
     def data(self, index, role):
@@ -93,7 +101,8 @@ class ActorRelatedEventEditDialog(q.QDialog):
 
         aiprog = ai.load_aiprog(new_actor.identifier.name)
         if not aiprog:
-            q.QMessageBox.critical(self, 'Cannot auto fill', 'Failed to load the actor AI program')
+            if not self.tryJsonAutofill(new_actor.identifier.name, new_attr):
+                q.QMessageBox.critical(self, 'Cannot auto fill', 'Failed to load the actor AI program')
             return
 
         actual_ai_class: typing.Optional[str] = None
@@ -116,6 +125,22 @@ class ActorRelatedEventEditDialog(q.QDialog):
             self.modified_params.data[param.name] = param.get_default_value()
 
         self.param_model.set(self.modified_params)
+    
+    def tryJsonAutofill(self, actor_name: str, attr_name: str) -> bool:
+        if not _json_path:
+            return False
+        
+        try:
+            with open(_json_path/f'{actor_name}#{attr_name}.json', "r") as stream:
+                data = stream.read()
+
+                self.modified_params.data.clear()
+                for key, value in json.loads(data).items():
+                    self.modified_params.data[key] = value
+                self.param_model.set(self.modified_params)
+                return True
+        except:
+            return False
 
     def onActorSelected(self, actor_idx: int) -> None:
         if actor_idx == -1:
