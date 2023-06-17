@@ -30,7 +30,7 @@ Alternatively, add
 [paths]
 json_root=/path/to/folder
 ```
-to the configuration folder, where `/path/to/folder` is a path to a folder containing `.json` files named in the format *`<Actor>`*`#`*`<Parameter>`*`.json`. This is intended for use where the rom option is not available, and requires manually crafted `.json` files *(by looking at existing event flows)*.
+to the configuration file, where `/path/to/folder` is a path to a folder containing `.json` files named in the format *`<Actor>`*`#`*`<Parameter>`*`.json`. This is intended for use where the rom option is not available, and requires manually crafted `.json` files *(from looking at existing event flows)*.
 
 #### Example JSON
 *`EventActor#Talk.json`*
