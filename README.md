@@ -4,6 +4,13 @@
 
 Install Python 3.6+ (**64 bit version**) and PyQt5, then run `pip install eventeditor`.
 
+### Configuration
+
+The configuration file is stored:
+
+* On Linux or macOS: at `~/.config/eventeditor/eventeditor.ini`
+* On Windows: at `%APPDATA%/eventeditor/eventeditor.ini`
+
 ### Auto completion
 
 In order to enable auto completion for actors, actions and queries, add:
@@ -18,10 +25,20 @@ to EventEditor's configuration file, where `/path/to/game_rom` is a path such th
 An easy, recommended way to get the required file structure without extracting every archive
 is to use [botwfstools](https://github.com/leoetlino/botwfstools).
 
-The configuration file is stored:
+Alternatively, add
+```ini
+[paths]
+json_root=/path/to/folder
+```
+to the configuration folder, where `/path/to/folder` is a path to a folder containing `.json` files named in the format *`<Actor>`*`#`*`<Parameter>`*`.json`. This is intended for use where the rom option is not available, and requires manually crafted `.json` files *(by looking at existing event flows)*.
 
-* On Linux or macOS: at `~/.config/eventeditor/eventeditor.ini`
-* On Windows: at `%APPDATA%/eventeditor/eventeditor.ini`
+#### Example JSON
+*`EventActor#Talk.json`*
+```json
+{
+    "IsWaitFinish": false
+}
+```
 
 ### Known issues
 
