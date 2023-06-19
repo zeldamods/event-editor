@@ -16,11 +16,11 @@ import PyQt5.QtCore as qc # type: ignore
 import PyQt5.QtGui as qg # type: ignore
 import PyQt5.QtWidgets as q # type: ignore
 
-_json_path: typing.Optional[Path] = None
-def set_json_path(p: typing.Optional[str]) -> None:
+_actor_json_path: typing.Optional[Path] = None
+def set_actor_json_path(p: typing.Optional[str]) -> None:
     if p:
-        global _json_path
-        _json_path = Path(p)
+        global _actor_json_path
+        _actor_json_path = Path(p)
 
 class ActorProxyModel(qc.QIdentityProxyModel):
     def data(self, index, role):
@@ -127,17 +127,23 @@ class ActorRelatedEventEditDialog(q.QDialog):
         self.param_model.set(self.modified_params)
     
     def tryJsonAutofill(self, actor_name: str, attr_name: str) -> bool:
-        if not _json_path:
+        if not _actor_json_path:
             return False
         
         try:
-            with open(_json_path/f'{actor_name}#{attr_name}.json', "r") as stream:
-                data = stream.read()
+            with open(_actor_json_path/f'{actor_name}.json', 'rt') as stream:
+                actor_json = json.loads(stream.read())
+
+                if attr_name not in actor_json:
+                    q.QMessageBox.critical(self, 'Cannot auto fill', 'The selected action/query is not registered in the JSON fallback.')
+                    # Didn't actually succeed but return True to not show ai_prog load error popup
+                    return True
 
                 self.modified_params.data.clear()
-                for key, value in json.loads(data).items():
+                for key, value in actor_json[attr_name].items():
                     self.modified_params.data[key] = value
                 self.param_model.set(self.modified_params)
+
                 return True
         except:
             return False

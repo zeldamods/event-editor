@@ -28,15 +28,17 @@ is to use [botwfstools](https://github.com/leoetlino/botwfstools).
 Alternatively, add
 ```ini
 [paths]
-json_root=/path/to/folder
+actor_json_root=/path/to/folder
 ```
-to the configuration file, where `/path/to/folder` is a path to a folder containing `.json` files named in the format *`<Actor>`*`#`*`<Parameter>`*`.json`. This is intended for use where the rom option is not available, and requires manually crafted `.json` files *(from looking at existing event flows)*.
+to the configuration file, where `/path/to/folder` is a path to a folder containing `.json` files named after each event actor. This is intended for use where the rom option is not available, and requires manually crafted `.json` files *(e.g. from looking at existing event flow(s))*.
 
 #### Example JSON
-*`EventActor#Talk.json`*
+*`EventActor.json`*
 ```json
 {
-    "IsWaitFinish": false
+    "Talk": {
+        "IsWaitFinish": false
+    }
 }
 ```
 

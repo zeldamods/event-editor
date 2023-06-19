@@ -181,7 +181,7 @@ class MainWindow(q.QMainWindow):
     def readSettings(self) -> None:
         settings = qc.QSettings()
         ai.set_rom_path(settings.value('paths/rom_root'))
-        evedit.set_json_path(settings.value('paths/json_root'))
+        evedit.set_actor_json_path(settings.value('paths/actor_json_root'))
         settings.beginGroup('MainWindow')
         self.resize(settings.value('size', qc.QSize(800, 600)))
         self.move(settings.value('pos', qc.QPoint(200, 200)))
