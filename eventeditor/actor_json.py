@@ -36,3 +36,15 @@ def load_event_parameters(actor_name: str, event_name: str, event_type: EventTyp
         return None
     except:
         return None
+
+def load_actions(actor_name: str) -> typing.KeysView[str]:
+    try:
+        return load_actor_json(actor_name)["actions"].keys()
+    except:
+        return None
+
+def load_queries(actor_name: str) -> typing.KeysView[str]:
+    try:
+        return load_actor_json(actor_name)["queries"].keys()
+    except:
+        return None
