@@ -64,8 +64,12 @@ def export_actor_json(actor_name: str, actions, queries, window) -> None:
     for query in queries:
         data['queries'][query.v] = {}
 
-    folder = str(_actor_json_path) if _actor_json_path else ''
-    path = q.QFileDialog.getSaveFileName(window, 'Export as...',  folder, 'JSON (*.json)')[0]
+    filename = str(_actor_json_path/f'{actor_name}') if _actor_json_path else actor_name
+    path = q.QFileDialog.getSaveFileName(window, 'Export as...',  filename, 'JSON (*.json)')[0]
+
+    if not path:
+        return
+
     with open(path, 'wt') as file:
         json.dump(data, file)
     file.close()

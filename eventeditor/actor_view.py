@@ -241,7 +241,7 @@ class ActorView(q.QWidget):
     
     def exportActor(self, idx: qc.QModelIndex) -> None:
         actor = idx.data(qc.Qt.UserRole)
-        json = aj.export_actor_json(actor.identifier, actor.actions, actor.queries, self)
+        json = aj.export_actor_json(actor.identifier.name, actor.actions, actor.queries, self)
 
     def hideActorDetailPane(self) -> None:
         self.detail_pane.setActor(None)
