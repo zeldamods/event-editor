@@ -11,6 +11,7 @@ import eventeditor.util as util
 from evfl import Container, Actor, Event
 from evfl.enums import EventType
 import evfl.event
+import json
 import PyQt5.QtCore as qc # type: ignore
 import PyQt5.QtGui as qg # type: ignore
 import PyQt5.QtWidgets as q # type: ignore
@@ -84,6 +85,7 @@ class ActorRelatedEventEditDialog(q.QDialog):
     def createParametersView(self) -> None:
         self.param_view = ContainerView(None, self.param_model, self.flow_data, has_autofill_btn=True)
         self.param_view.autofillRequested.connect(self.onAutofillRequested)
+        self.param_view.copyJsonRequested.connect(self.onCopyJsonRequested)
 
     def onAutofillRequested(self) -> None:
         new_actor: Actor = self.actor_cbox.currentData()
@@ -138,6 +140,17 @@ class ActorRelatedEventEditDialog(q.QDialog):
 
         except:
             return False
+    
+    def onCopyJsonRequested(self) -> None:
+        toClipboard = json.dumps(self.modified_params.data)
+
+        if self.attr_cbox.currentData():
+            params = dict()
+            params[str(self.attr_cbox.currentData().v)] = self.modified_params.data
+            # Remove outer curly brackets for convenience
+            toClipboard = json.dumps(params)[1:-1]
+
+        q.QApplication.clipboard().setText(toClipboard)
 
     def onActorSelected(self, actor_idx: int) -> None:
         if actor_idx == -1:

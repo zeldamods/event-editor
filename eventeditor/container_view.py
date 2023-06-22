@@ -145,6 +145,7 @@ class ContainerAddItemDialog(q.QDialog):
 
 class ContainerView(q.QWidget):
     autofillRequested = qc.pyqtSignal()
+    copyJsonRequested = qc.pyqtSignal()
 
     def __init__(self, parent, model: ContainerModel, flow_data, has_autofill_btn=False) -> None:
         super().__init__(parent)
@@ -174,11 +175,15 @@ class ContainerView(q.QWidget):
         self.autofill_btn = q.QPushButton('Auto fill')
         self.autofill_btn.setStyleSheet('padding: 2px 5px;')
         self.autofill_btn.clicked.connect(self.autofillRequested)
+        self.copy_btn = q.QPushButton('Copy JSON')
+        self.copy_btn.setStyleSheet('padding: 2px 5px;')
+        self.copy_btn.clicked.connect(self.copyJsonRequested)
         box = q.QHBoxLayout()
         label = q.QLabel('Parameters')
         label.setStyleSheet('font-weight: bold;')
         box.addWidget(label, stretch=1)
         if has_autofill_btn:
+            box.addWidget(self.copy_btn)
             box.addWidget(self.autofill_btn)
         box.addWidget(self.add_btn)
 
