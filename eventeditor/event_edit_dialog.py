@@ -2,6 +2,7 @@ import copy
 import typing
 
 import eventeditor.ai as ai
+import eventeditor.actor_json as aj
 from eventeditor.actor_string_list_model import ActorStringListModel
 from eventeditor.container_model import ContainerModel
 from eventeditor.container_view import ContainerView
@@ -10,17 +11,9 @@ import eventeditor.util as util
 from evfl import Container, Actor, Event
 from evfl.enums import EventType
 import evfl.event
-import json
-from pathlib import Path
 import PyQt5.QtCore as qc # type: ignore
 import PyQt5.QtGui as qg # type: ignore
 import PyQt5.QtWidgets as q # type: ignore
-
-_actor_json_path: typing.Optional[Path] = None
-def set_actor_json_path(p: typing.Optional[str]) -> None:
-    if p:
-        global _actor_json_path
-        _actor_json_path = Path(p)
 
 class ActorProxyModel(qc.QIdentityProxyModel):
     def data(self, index, role):
@@ -126,25 +119,23 @@ class ActorRelatedEventEditDialog(q.QDialog):
 
         self.param_model.set(self.modified_params)
     
-    def tryJsonAutofill(self, actor_name: str, attr_name: str) -> bool:
-        if not _actor_json_path:
-            return False
-        
+    def tryJsonAutofill(self, actor_name: str, attr_name: str) -> bool:        
         try:
-            with open(_actor_json_path/f'{actor_name}.json', 'rt') as stream:
-                actor_json = json.loads(stream.read())
+            event_type = aj.EventType.Query if self.is_switch else aj.EventType.Action
+            parameters = aj.load_event_parameters(actor_name, attr_name, event_type)
 
-                if attr_name not in actor_json:
-                    q.QMessageBox.critical(self, 'Cannot auto fill', 'The selected action/query is not registered in the JSON fallback.')
-                    # Didn't actually succeed but return True to not show ai_prog load error popup
-                    return True
-
-                self.modified_params.data.clear()
-                for key, value in actor_json[attr_name].items():
-                    self.modified_params.data[key] = value
-                self.param_model.set(self.modified_params)
-
+            if parameters is None:
+                q.QMessageBox.critical(self, 'Cannot auto fill', 'The selected action/query is not registered in the JSON fallback.')
+                # Didn't actually succeed but return True to not replace aiprog load error
                 return True
+
+            self.modified_params.data.clear()
+            for key, value in parameters.items():
+                self.modified_params.data[key] = value
+            self.param_model.set(self.modified_params)
+
+            return True
+
         except:
             return False
 
