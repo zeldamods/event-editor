@@ -1,7 +1,9 @@
 from enum import IntEnum
+import typing
+
 import json
 from pathlib import Path
-import typing
+import PyQt5.QtWidgets as q
 
 _actor_json_path: typing.Optional[Path] = None
 def set_actor_json_path(p: typing.Optional[str]) -> None:
@@ -30,21 +32,40 @@ def load_event_parameters(actor_name: str, event_name: str, event_type: EventTyp
         actor = load_actor_json(actor_name)
 
         if event_type == EventType.Action:
-            return actor["actions"][event_name]
+            return actor['actions'][event_name]
         if event_type == EventType.Query:
-            return actor["queries"][event_name]
+            return actor['queries'][event_name]
         return None
     except:
         return None
 
 def load_actions(actor_name: str) -> typing.KeysView[str]:
     try:
-        return load_actor_json(actor_name)["actions"].keys()
+        return load_actor_json(actor_name)['actions'].keys()
     except:
         return None
 
 def load_queries(actor_name: str) -> typing.KeysView[str]:
     try:
-        return load_actor_json(actor_name)["queries"].keys()
+        return load_actor_json(actor_name)['queries'].keys()
     except:
         return None
+
+def export_actor_json(actor_name: str, actions, queries, window) -> None:
+    # Should open existing file and insert/replace actor entry?
+
+    data = dict()
+    data['actions'] = {}
+    data['queries'] = {}
+    # Also support actor parameters?
+
+    for action in actions:
+        data['actions'][action.v] = {}
+    for query in queries:
+        data['queries'][query.v] = {}
+
+    folder = str(_actor_json_path) if _actor_json_path else ''
+    path = q.QFileDialog.getSaveFileName(window, 'Export as...',  folder, 'JSON (*.json)')[0]
+    with open(path, 'wt') as file:
+        json.dump(data, file)
+    file.close()
