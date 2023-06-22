@@ -171,7 +171,7 @@ class ActorQueryListView(ActorStringListView):
         else:
             json_queries = aj.load_queries(name)
             if json_queries:
-                queries = list(json_actions)
+                queries = list(json_queries)
 
         add_dialog = ActorAIClassAddDialog(self, qc.QStringListModel(queries, self))
         add_dialog.setWindowTitle(f'Add a query for {name}')
