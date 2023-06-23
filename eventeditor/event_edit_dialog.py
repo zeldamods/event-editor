@@ -127,9 +127,7 @@ class ActorRelatedEventEditDialog(q.QDialog):
             parameters = aj.load_event_parameters(actor_name, attr_name, event_type)
 
             if parameters is None:
-                q.QMessageBox.critical(self, 'Cannot auto fill', 'The selected action/query is not registered in the JSON fallback.')
-                # Didn't actually succeed but return True to not replace aiprog load error
-                return True
+                return False
 
             self.modified_params.data.clear()
             for key, value in parameters.items():
