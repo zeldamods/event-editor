@@ -15,9 +15,9 @@ class EventType(IntEnum):
     Action = 0
     Query = 1
 
-def load_actor_json(actor_name: str) -> dict:
+def load_actor_json(actor_name: str) -> typing.Dict[str, typing.Any]:
     if not _actor_json_path:
-        return False
+        return None
 
     try:
         # Try loading from a single file with all actors first
@@ -51,7 +51,7 @@ def load_queries(actor_name: str) -> typing.KeysView[str]:
     except:
         return None
 
-def export_actor_json(actor_name: str, actions, queries, window) -> None:
+def export_actor_json(actor_name: str, actions: typing.List[str], queries: typing.List[str], window) -> None:
     # Should open existing file and insert/replace actor entry?
 
     data = dict()
@@ -60,9 +60,9 @@ def export_actor_json(actor_name: str, actions, queries, window) -> None:
     # Also support actor parameters?
 
     for action in actions:
-        data['actions'][action.v] = {}
+        data['actions'][action] = {}
     for query in queries:
-        data['queries'][query.v] = {}
+        data['queries'][query] = {}
 
     filename = str(_actor_json_path/f'{actor_name}') if _actor_json_path else actor_name
     path = q.QFileDialog.getSaveFileName(window, 'Export as...',  filename, 'JSON (*.json)')[0]
