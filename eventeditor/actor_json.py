@@ -51,7 +51,7 @@ def load_queries(actor_name: str) -> typing.KeysView[str]:
     except:
         return None
 
-def export_actor_json(actor_name: str, actions: typing.List[str], queries: typing.List[str], window) -> None:
+def export_actor_json(actor_name: str, actions: typing.List[str], queries: typing.List[str], parent: typing.Optional[QWidget]) -> None:
     # Should open existing file and insert/replace actor entry?
 
     data = dict()
@@ -65,7 +65,7 @@ def export_actor_json(actor_name: str, actions: typing.List[str], queries: typin
         data['queries'][query] = {}
 
     filename = str(_actor_json_path/f'{actor_name}') if _actor_json_path else actor_name
-    path = q.QFileDialog.getSaveFileName(window, 'Export as...',  filename, 'JSON (*.json)')[0]
+    path = q.QFileDialog.getSaveFileName(parent, 'Export as...',  filename, 'JSON (*.json)')[0]
 
     if not path:
         return
