@@ -51,25 +51,29 @@ def load_queries(actor_name: str) -> typing.KeysView[str]:
     except:
         return None
 
-def export_actor_json(actor_name: str, actions: typing.List[str], queries: typing.List[str], parent: typing.Optional[QWidget]) -> None:
-    # Should open existing file and insert/replace actor entry?
+def export_actor_json(actor_name: str, actions: typing.List[str], queries: typing.List[str], widget) -> None:
+    if not _actor_json_path:
+        set_actor_json_path(q.QFileDialog.getSaveFileName(widget, 'Set ',  'actor_definitions', 'JSON (*.json)')[0])
 
-    data = dict()
-    data['actions'] = {}
-    data['queries'] = {}
-    # Also support actor parameters?
-
-    for action in actions:
-        data['actions'][action] = {}
-    for query in queries:
-        data['queries'][query] = {}
-
-    filename = str(_actor_json_path/f'{actor_name}') if _actor_json_path else actor_name
-    path = q.QFileDialog.getSaveFileName(parent, 'Export as...',  filename, 'JSON (*.json)')[0]
-
-    if not path:
+    if not _actor_json_path:
         return
+    
+    try:
+        with open(_actor_json_path, 'rt') as file:
+            definitions = json.loads(file.read())
+    except:
+        definitions = dict()
 
-    with open(path, 'wt') as file:
-        json.dump(data, file)
-    file.close()
+    with open(_actor_json_path, 'wt') as file:
+        # Will replace existing entry, user should be prompted
+        definitions[actor_name] = {}
+        definitions[actor_name]['actions'] = {}
+        definitions[actor_name]['queries'] = {}
+        # Also support actor parameters?
+
+        for action in actions:
+            definitions[actor_name]['actions'][action] = {}
+        for query in queries:
+            definitions[actor_name]['queries'][query] = {}
+
+        json.dump(definitions, file)

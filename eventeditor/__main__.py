@@ -204,6 +204,11 @@ class MainWindow(q.QMainWindow):
         settings.setValue('visible_params', self.event_param_visible_action.isChecked())
         settings.endGroup()
 
+        if aj._actor_json_path:
+            settings.beginGroup('paths')
+            settings.setValue('actor_json_root', str(aj._actor_json_path))
+            settings.endGroup()
+
     def updateTitleAndActions(self) -> None:
         if not self.flow:
             self.setWindowTitle('EventEditor')
