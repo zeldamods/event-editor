@@ -20,7 +20,7 @@ def load_actor_json(actor_name: str) -> typing.Dict[str, typing.Any]:
         return None
 
     try:
-        # First look for individual actor file
+        # First look for individual actor file (overrides)
         with open(_actor_json_path.parent/f'{actor_name}.json', 'rt') as file:
             return json.loads(file.read())
     except:
@@ -55,6 +55,7 @@ def load_queries(actor_name: str) -> typing.KeysView[str]:
     except:
         return None
 
+#! Replace with 'export all actors' menu option
 def export_actor_json(actor_name: str, actions: typing.List[str], queries: typing.List[str], widget) -> None:
     if not _actor_json_path:
         set_actor_json_path(q.QFileDialog.getSaveFileName(widget, 'Set ',  'actor_definitions', 'JSON (*.json)')[0])
@@ -69,15 +70,18 @@ def export_actor_json(actor_name: str, actions: typing.List[str], queries: typin
         definitions = dict()
 
     with open(_actor_json_path, 'wt') as file:
-        # Will replace existing entry, user should be prompted
+        #! Will replace existing entry, user should be prompted
         definitions[actor_name] = {}
         definitions[actor_name]['actions'] = {}
         definitions[actor_name]['queries'] = {}
-        # Also support actor parameters?
+        #! Also support actor parameters?
+        # - currently no auto-complete option at all?
 
         for action in actions:
             definitions[actor_name]['actions'][action] = {}
+            #! Somehow find event and populate with sample parameters
         for query in queries:
             definitions[actor_name]['queries'][query] = {}
+            #! Somehow find event and populate with sample parameters
 
         json.dump(definitions, file)
