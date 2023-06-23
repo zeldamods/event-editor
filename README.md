@@ -11,9 +11,11 @@ The configuration file is stored:
 * On Linux or macOS: at `~/.config/eventeditor/eventeditor.ini`
 * On Windows: at `%APPDATA%/eventeditor/eventeditor.ini`
 
-### Auto completion
+### Auto-completion
 
-In order to enable auto completion for actors, actions and queries, add:
+#### Breath of the Wild
+
+In order to enable auto-completion for actors, actions, and queries, add:
 
 ```ini
 [paths]
@@ -25,19 +27,38 @@ to EventEditor's configuration file, where `/path/to/game_rom` is a path such th
 An easy, recommended way to get the required file structure without extracting every archive
 is to use [botwfstools](https://github.com/leoetlino/botwfstools).
 
-Alternatively, add
+#### Other games
+
+Alternatively, add:
+
 ```ini
 [paths]
 actor_json_root=/path/to/folder
 ```
-to the configuration file, where `/path/to/folder` is a path to a folder containing `.json` files named after each event actor. This is intended for use where the rom option is not available, and requires manually crafted `.json` files *(e.g. from looking at existing event flow(s))*.
+to the configuration file, where `/path/to/folder` is a path to a folder containing `.json` files named after each event actor.
 
-#### Example JSON
-*`EventActor.json`*
+This is intended for use where the rom option is not available, and requires manually crafted `.json` files. Currently the program provides some tools that can assist in the generation of these files:
+
+0. Set the `actor_json_root` path in the configuration file
+1. Open an existing event flow and switch to the *Actors* tab
+2. Right-click on an actor > *Export JSON*
+    - Save it in the folder specified in the configuration file
+    - Do not change the filename, as it is used to find the actor when auto-completing
+3. Right-click on an action/query to *Jump to events* that use it 
+4. Right-click on an event > *Edit...* to view parameters and click *Copy JSON*
+    - The parameter values used in the chosen event will be used as default values for auto-completion *(can be manually edited)*
+5. Open the generated `.json` file and replace (paste) the copied action/query
+
+##### Example JSON (formatted)
 ```json
+// EventActor.json
 {
-    "Talk": {
-        "IsWaitFinish": false
+    "actions": {
+        "Talk": {
+            "IsWaitFinish": false
+        }
+    },
+    "queries": {
     }
 }
 ```
