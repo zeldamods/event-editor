@@ -20,12 +20,16 @@ def load_actor_json(actor_name: str) -> typing.Dict[str, typing.Any]:
         return None
 
     try:
-        # Try loading from a single file with all actors first
-        # before looking for individual actor files?
-        with open(_actor_json_path/f'{actor_name}.json', 'rt') as stream:
-            return json.loads(stream.read())
+        # First look for individual actor file
+        with open(_actor_json_path.parent/f'{actor_name}.json', 'rt') as file:
+            return json.loads(file.read())
     except:
-        return None
+        try:
+            # Otherwise look in actor definitions file
+            with open(_actor_json_path, 'rt') as file:
+                return json.loads(file.read())[actor_name]
+        except:
+            return None
 
 def load_event_parameters(actor_name: str, event_name: str, event_type: EventType) -> typing.Dict[str, typing.Any]:
     try:
