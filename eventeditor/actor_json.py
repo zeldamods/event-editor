@@ -20,7 +20,7 @@ def load_actor_json(actor_name: str) -> typing.Dict[str, typing.Any]:
         return None
 
     try:
-        # First look for individual actor file (overrides)
+        # First look for individual actor file (overrides; for power users)
         with open(_actor_json_path.parent/f'{actor_name}.json', 'rt') as file:
             return json.loads(file.read())
     except:
@@ -113,7 +113,7 @@ def export_definitions(flow, widget) -> None:
             continue
         for param in event.data.params.data:
             # Only populate, never overwrite
-            # Power-users can manually edit the json file (or use the copy parameters button)
+            # Power users can manually edit the json file (or use the copy parameters button)
             if param not in json_parent[event_key]:
                 json_parent[event_key][param] = event.data.params.data[param]
     

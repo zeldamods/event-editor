@@ -154,16 +154,14 @@ class ActorRelatedEventEditDialog(q.QDialog):
     def onPasteJsonRequested(self) -> None:
         try:
             data = json.loads(f'{{{q.QApplication.clipboard().text()}}}')
-            # if str(self.attr_cbox.currentData().v) not in data:
-                # Prompt user if still want to paste?
-                # May need deeper error-checking
             params = data[self.attr_cbox.currentData().v]
             self.modified_params.data.clear()
             for param in params:
                 self.modified_params.data[param] = params[param]
             self.param_model.set(self.modified_params)
 
-        except Exception as e: print(e)
+        except:
+            q.QMessageBox.critical(self, 'Paste JSON', 'Failed to paste clipboard data as parameters.')
 
     def onActorSelected(self, actor_idx: int) -> None:
         if actor_idx == -1:
