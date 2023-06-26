@@ -60,11 +60,11 @@ def export_definitions(flow, widget) -> None:
         q.QMessageBox.information(widget, 'Export actor definition data', 'Open an event flow first')
         return
 
-    # if not _actor_json_path:
-    #     set_actor_json_path(q.QFileDialog.getSaveFileName(widget, 'Set ',  'actor_definitions', 'JSON (*.json)')[0])
+    if not _actor_json_path:
+        set_actor_json_path(q.QFileDialog.getSaveFileName(widget, 'Set ',  'actor_definitions', 'JSON (*.json)')[0])
 
-    # if not _actor_json_path:
-    #     return
+    if not _actor_json_path:
+        return
 
     try:
         with open(_actor_json_path, 'rt') as file:
@@ -81,20 +81,41 @@ def export_definitions(flow, widget) -> None:
         for action in actor.actions:
             if action.v not in definitions[actor.identifier.name]['actions']:
                 definitions[actor.identifier.name]['actions'][action.v] = {}
-            # Populate/overwrite event parameters?
 
         if 'queries' not in definitions[actor.identifier.name]:
             definitions[actor.identifier.name]['queries'] = {}
         for query in actor.queries:
             if query.v not in definitions[actor.identifier.name]['queries']:
                 definitions[actor.identifier.name]['queries'][query.v] = {}
-            # Populate/overwrite event parameters?
         
-        #! Also support actor parameters?
+        #! Should actor parameters also be supported?
         #   - currently no auto-complete option at all?
     
-    # with open(_actor_json_path, 'wt') as file:
-    #     json.dump(definitions, file)
+    #! Should exporting be restructured to only loop through the events?
+    for event in flow.flowchart.events:
+        if hasattr(event.data, 'actor_action'):
+            json_parent = definitions[event.data.actor.v.identifier.name]['actions']
+            event_key = event.data.actor_action.v.v
+        elif hasattr(event.data, 'actor_query'):
+            json_parent = definitions[event.data.actor.v.identifier.name]['queries']
+            event_key = event.data.actor_query.v.v
+        else:
+            # Skip subflows
+            continue
 
-    #! For development
-    q.QApplication.clipboard().setText(json.dumps(definitions))
+        if event_key not in json_parent:
+            # Shouldn't be reachable, as event names are populated in actor loop?
+            # Also means that event types that have already been added can't be skipped,
+            # as there is no way to check -- is this okay to ensure all possible
+            # parameters are exported (in case an event is missing one?)?
+            json_parent[event_key] = {}
+        if not event.data.params:
+            continue
+        for param in event.data.params.data:
+            # Only populate, never overwrite
+            # Power-users can manually edit the json file (or use the copy parameters button)
+            if param not in json_parent[event_key]:
+                json_parent[event_key][param] = event.data.params.data[param]
+    
+    with open(_actor_json_path, 'wt') as file:
+        json.dump(definitions, file)

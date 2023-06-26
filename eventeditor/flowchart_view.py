@@ -207,10 +207,8 @@ class FlowchartView(q.QWidget):
     def export_definitions(self) -> None:
         try:
             aj.export_definitions(self.flow_data.flow, self)
-        except Exception as e: print(e)
-        # except:
-        #     #! Improve: more specificity
-        #     q.QMessageBox.critical(self, 'Export actor definition data', 'Failed')
+        except:
+            q.QMessageBox.critical(self, 'Export actor definition data', 'Failed to write to ' + path)
 
     def reload(self) -> None:
         self.view.reload()
