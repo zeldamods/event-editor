@@ -86,6 +86,7 @@ class ActorRelatedEventEditDialog(q.QDialog):
         self.param_view = ContainerView(None, self.param_model, self.flow_data, has_autofill_btn=True)
         self.param_view.autofillRequested.connect(self.onAutofillRequested)
         self.param_view.copyJsonRequested.connect(self.onCopyJsonRequested)
+        self.param_view.pasteJsonRequested.connect(self.onPasteJsonRequested)
 
     def onAutofillRequested(self) -> None:
         new_actor: Actor = self.actor_cbox.currentData()
@@ -130,8 +131,8 @@ class ActorRelatedEventEditDialog(q.QDialog):
                 return False
 
             self.modified_params.data.clear()
-            for key, value in parameters.items():
-                self.modified_params.data[key] = value
+            for param in parameters:
+                self.modified_params.data[param] = parameter[param]
             self.param_model.set(self.modified_params)
 
             return True
@@ -149,6 +150,20 @@ class ActorRelatedEventEditDialog(q.QDialog):
             toClipboard = json.dumps(params)[1:-1]
 
         q.QApplication.clipboard().setText(toClipboard)
+    
+    def onPasteJsonRequested(self) -> None:
+        try:
+            data = json.loads(f'{{{q.QApplication.clipboard().text()}}}')
+            # if str(self.attr_cbox.currentData().v) not in data:
+                # Prompt user if still want to paste?
+                # May need deeper error-checking
+            params = data[self.attr_cbox.currentData().v]
+            self.modified_params.data.clear()
+            for param in params:
+                self.modified_params.data[param] = params[param]
+            self.param_model.set(self.modified_params)
+
+        except Exception as e: print(e)
 
     def onActorSelected(self, actor_idx: int) -> None:
         if actor_idx == -1:
