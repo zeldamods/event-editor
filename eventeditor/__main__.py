@@ -104,6 +104,8 @@ class MainWindow(q.QMainWindow):
         view_menu.addAction(self.reload_graph_action)
         self.export_graph_action = q.QAction('E&xport graph data to JSON...', self)
         view_menu.addAction(self.export_graph_action)
+        self.export_definitions_action = q.QAction('Ex&port actor definition data to JSON...', self)
+        view_menu.addAction(self.export_definitions_action)
         view_menu.addSeparator()
         self.add_event_action = q.QAction('&Add event...', self)
         view_menu.addAction(self.add_event_action)
@@ -151,6 +153,7 @@ class MainWindow(q.QMainWindow):
         self.flowchart_view.eventSelected.connect(self.onEventSelected)
         self.reload_graph_action.triggered.connect(self.flowchart_view.reload)
         self.export_graph_action.triggered.connect(self.flowchart_view.export)
+        self.export_definitions_action.triggered.connect(self.flowchart_view.export_definitions)
         self.add_event_action.triggered.connect(self.flowchart_view.addNewEvent)
         self.add_fork_action.triggered.connect(self.flowchart_view.addFork)
 

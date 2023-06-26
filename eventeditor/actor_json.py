@@ -55,33 +55,46 @@ def load_queries(actor_name: str) -> typing.KeysView[str]:
     except:
         return None
 
-#! Replace with 'export all actors' menu option
-def export_actor_json(actor_name: str, actions: typing.List[str], queries: typing.List[str], widget) -> None:
-    if not _actor_json_path:
-        set_actor_json_path(q.QFileDialog.getSaveFileName(widget, 'Set ',  'actor_definitions', 'JSON (*.json)')[0])
-
-    if not _actor_json_path:
+def export_definitions(flow, widget) -> None:
+    if not flow:
+        q.QMessageBox.information(widget, 'Export actor definition data', 'Open an event flow first')
         return
-    
+
+    # if not _actor_json_path:
+    #     set_actor_json_path(q.QFileDialog.getSaveFileName(widget, 'Set ',  'actor_definitions', 'JSON (*.json)')[0])
+
+    # if not _actor_json_path:
+    #     return
+
     try:
         with open(_actor_json_path, 'rt') as file:
             definitions = json.loads(file.read())
     except:
         definitions = dict()
+    
+    for actor in flow.flowchart.actors:
+        if actor.identifier.name not in definitions:
+            definitions[actor.identifier.name] = {}
 
-    with open(_actor_json_path, 'wt') as file:
-        #! Will replace existing entry, user should be prompted
-        definitions[actor_name] = {}
-        definitions[actor_name]['actions'] = {}
-        definitions[actor_name]['queries'] = {}
+        if 'actions' not in definitions[actor.identifier.name]:
+            definitions[actor.identifier.name]['actions'] = {}        
+        for action in actor.actions:
+            if action.v not in definitions[actor.identifier.name]['actions']:
+                definitions[actor.identifier.name]['actions'][action.v] = {}
+            # Populate/overwrite event parameters?
+
+        if 'queries' not in definitions[actor.identifier.name]:
+            definitions[actor.identifier.name]['queries'] = {}
+        for query in actor.queries:
+            if query.v not in definitions[actor.identifier.name]['queries']:
+                definitions[actor.identifier.name]['queries'][query.v] = {}
+            # Populate/overwrite event parameters?
+        
         #! Also support actor parameters?
-        # - currently no auto-complete option at all?
+        #   - currently no auto-complete option at all?
+    
+    # with open(_actor_json_path, 'wt') as file:
+    #     json.dump(definitions, file)
 
-        for action in actions:
-            definitions[actor_name]['actions'][action] = {}
-            #! Somehow find event and populate with sample parameters
-        for query in queries:
-            definitions[actor_name]['queries'][query] = {}
-            #! Somehow find event and populate with sample parameters
-
-        json.dump(definitions, file)
+    #! For development
+    q.QApplication.clipboard().setText(json.dumps(definitions))

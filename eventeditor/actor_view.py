@@ -1,7 +1,6 @@
 from enum import IntEnum, auto
 import typing
 
-import eventeditor.actor_json as aj
 from eventeditor.actor_model import ActorModelColumn
 from eventeditor.actor_string_list_model import ActorStringListModel
 from eventeditor.actor_string_list_view import ActorActionListView, ActorQueryListView
@@ -238,12 +237,6 @@ class ActorView(q.QWidget):
             return
 
         self.flow_data.actor_model.remove(actor)
-    
-    def exportActor(self, idx: qc.QModelIndex) -> None:
-        actor = idx.data(qc.Qt.UserRole)
-        actions = [action.v for action in actor.actions]
-        queries = [query.v for query in actor.queries]
-        aj.export_actor_json(actor.identifier.name, actions, queries, self)
 
     def hideActorDetailPane(self) -> None:
         self.detail_pane.setActor(None)
@@ -271,6 +264,5 @@ class ActorView(q.QWidget):
         menu = q.QMenu()
         menu.addAction('&Edit...', lambda: self.editActor(idx))
         menu.addAction('&Remove', lambda: self.removeActor(idx))
-        menu.addAction('&Export JSON', lambda: self.exportActor(idx))
         menu.addAction('&Jump to events', lambda: self.jumpToActorEventsRequested.emit(str(idx.data(qc.Qt.UserRole).identifier) + '::'))
         menu.exec_(self.sender().viewport().mapToGlobal(pos))
