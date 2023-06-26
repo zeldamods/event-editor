@@ -71,7 +71,9 @@ class MainWindow(q.QMainWindow):
         self.save_action.triggered.connect(self.onSaveFile)
 
         self.save_as_action = q.QAction('Save as...', self)
-        self.save_as_action.setShortcut(qg.QKeySequence.SaveAs)
+        # No shortcut is assigned for Windows in QKeySequence.SaveAs
+        # self.save_as_action.setShortcut(qg.QKeySequence.SaveAs)
+        self.save_as_action.setShortcut('Ctrl+Shift+S')
         self.save_as_action.setEnabled(False)
         self.save_as_action.triggered.connect(self.onSaveAsFile)
 
