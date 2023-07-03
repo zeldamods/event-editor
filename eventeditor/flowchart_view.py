@@ -208,7 +208,7 @@ class FlowchartView(q.QWidget):
         try:
             aj.export_definitions(self.flow_data.flow, self)
         except:
-            q.QMessageBox.critical(self, 'Export actor definition data', 'Failed to write to ' + path)
+            q.QMessageBox.critical(self, 'Export actor definition data', 'Failed to write to ' + str(aj._actor_json_path))
 
     def reload(self) -> None:
         self.view.reload()

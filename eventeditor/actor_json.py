@@ -43,13 +43,13 @@ def load_event_parameters(actor_name: str, event_name: str, event_type: EventTyp
     except:
         return None
 
-def load_actions(actor_name: str) -> typing.KeysView[str]:
+def load_actions(actor_name: str) -> typing.Iterable[str]:
     try:
         return load_actor_json(actor_name)['actions'].keys()
     except:
         return None
 
-def load_queries(actor_name: str) -> typing.KeysView[str]:
+def load_queries(actor_name: str) -> typing.Iterable[str]:
     try:
         return load_actor_json(actor_name)['queries'].keys()
     except:
@@ -61,7 +61,7 @@ def export_definitions(flow, widget) -> None:
         return
 
     if not _actor_json_path:
-        set_actor_json_path(q.QFileDialog.getSaveFileName(widget, 'Set ',  'actor_definitions', 'JSON (*.json)')[0])
+        set_actor_json_path(q.QFileDialog.getSaveFileName(widget, 'Export actor definitions to...',  'actor_definitions', 'JSON (*.json)')[0])
 
     if not _actor_json_path:
         return

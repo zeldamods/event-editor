@@ -132,7 +132,7 @@ class ActorRelatedEventEditDialog(q.QDialog):
 
             self.modified_params.data.clear()
             for param in parameters:
-                self.modified_params.data[param] = parameter[param]
+                self.modified_params.data[param] = parameters[param]
             self.param_model.set(self.modified_params)
 
             return True
