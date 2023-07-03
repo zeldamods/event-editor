@@ -186,7 +186,7 @@ class MainWindow(q.QMainWindow):
     def readSettings(self) -> None:
         settings = qc.QSettings()
         ai.set_rom_path(settings.value('paths/rom_root'))
-        aj.set_actor_json_path(settings.value('paths/actor_json_root'))
+        aj.set_actor_definitions_path(settings.value('paths/actor_definitions_root'))
         settings.beginGroup('MainWindow')
         self.resize(settings.value('size', qc.QSize(800, 600)))
         self.move(settings.value('pos', qc.QPoint(200, 200)))
@@ -209,9 +209,9 @@ class MainWindow(q.QMainWindow):
         settings.setValue('visible_params', self.event_param_visible_action.isChecked())
         settings.endGroup()
 
-        if aj._actor_json_path:
+        if aj._actor_definitions_path:
             settings.beginGroup('paths')
-            settings.setValue('actor_json_root', str(aj._actor_json_path))
+            settings.setValue('actor_definitions_root', str(aj._actor_definitions_path))
             settings.endGroup()
 
     def updateTitleAndActions(self) -> None:

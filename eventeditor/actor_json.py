@@ -5,28 +5,28 @@ import json
 from pathlib import Path
 import PyQt5.QtWidgets as q
 
-_actor_json_path: typing.Optional[Path] = None
-def set_actor_json_path(p: typing.Optional[str]) -> None:
+_actor_definitions_path: typing.Optional[Path] = None
+def set_actor_definitions_path(p: typing.Optional[str]) -> None:
     if p:
-        global _actor_json_path
-        _actor_json_path = Path(p)
+        global _actor_definitions_path
+        _actor_definitions_path = Path(p)
 
 class EventType(IntEnum):
     Action = 0
     Query = 1
 
 def load_actor_json(actor_name: str) -> typing.Dict[str, typing.Any]:
-    if not _actor_json_path:
+    if not _actor_definitions_path:
         return None
 
     try:
         # First look for individual actor file (overrides; for power users)
-        with open(_actor_json_path.parent/f'{actor_name}.json', 'rt') as file:
+        with open(_actor_definitions_path.parent/f'{actor_name}.json', 'rt') as file:
             return json.loads(file.read())
     except:
         try:
             # Otherwise look in actor definitions file
-            with open(_actor_json_path, 'rt') as file:
+            with open(_actor_definitions_path, 'rt') as file:
                 return json.loads(file.read())[actor_name]
         except:
             return None
@@ -60,14 +60,14 @@ def export_definitions(flow, widget) -> None:
         q.QMessageBox.information(widget, 'Export actor definition data', 'Open an event flow first')
         return
 
-    if not _actor_json_path:
-        set_actor_json_path(q.QFileDialog.getSaveFileName(widget, 'Export actor definitions to...',  'actor_definitions', 'JSON (*.json)')[0])
+    if not _actor_definitions_path:
+        set_actor_definitions_path(q.QFileDialog.getSaveFileName(widget, 'Export actor definitions to...',  'actor_definitions', 'JSON (*.json)')[0])
 
-    if not _actor_json_path:
+    if not _actor_definitions_path:
         return
 
     try:
-        with open(_actor_json_path, 'rt') as file:
+        with open(_actor_definitions_path, 'rt') as file:
             definitions = json.loads(file.read())
     except:
         definitions = dict()
@@ -117,5 +117,5 @@ def export_definitions(flow, widget) -> None:
             if param not in json_parent[event_key]:
                 json_parent[event_key][param] = event.data.params.data[param]
     
-    with open(_actor_json_path, 'wt') as file:
+    with open(_actor_definitions_path, 'wt') as file:
         json.dump(definitions, file)
