@@ -1,6 +1,7 @@
 from enum import IntEnum
 import typing
 
+from evfl import EventFlow
 from evfl.event import ActionEvent, SwitchEvent
 import json
 from pathlib import Path
@@ -16,7 +17,7 @@ class EventType(IntEnum):
     Action = 0
     Query = 1
 
-def load_actor_json(actor_name: str) -> typing.Dict[str, typing.Any]:
+def load_actor_json(actor_name: str) -> typing.Optional[typing.Dict[str, typing.Any]]:
     if not _actor_definitions_path:
         return None
 
@@ -32,7 +33,7 @@ def load_actor_json(actor_name: str) -> typing.Dict[str, typing.Any]:
         except:
             return None
 
-def load_event_parameters(actor_name: str, event_name: str, event_type: EventType) -> typing.Dict[str, typing.Any]:
+def load_event_parameters(actor_name: str, event_name: str, event_type: EventType) -> typing.Optional[typing.Dict[str, typing.Any]]:
     try:
         actor = load_actor_json(actor_name)
 
@@ -44,19 +45,19 @@ def load_event_parameters(actor_name: str, event_name: str, event_type: EventTyp
     except:
         return None
 
-def load_actions(actor_name: str) -> typing.Iterable[str]:
+def load_actions(actor_name: str) -> typing.Optional[typing.Iterable[str]]:
     try:
         return load_actor_json(actor_name)['actions'].keys()
     except:
         return None
 
-def load_queries(actor_name: str) -> typing.Iterable[str]:
+def load_queries(actor_name: str) -> typing.Optional[typing.Iterable[str]]:
     try:
         return load_actor_json(actor_name)['queries'].keys()
     except:
         return None
 
-def export_definitions(flow, widget) -> None:
+def export_definitions(flow: typing.Optional[EventFlow], widget: typing.Optional['QWidget']) -> None:
     if not flow:
         q.QMessageBox.information(widget, 'Export actor definition data', 'Open an event flow first')
         return
