@@ -1,6 +1,7 @@
 from enum import IntEnum
 import typing
 
+from evfl.event import ActionEvent, SwitchEvent
 import json
 from pathlib import Path
 import PyQt5.QtWidgets as q
@@ -88,15 +89,13 @@ def export_definitions(flow, widget) -> None:
             if query.v not in definitions[actor.identifier.name]['queries']:
                 definitions[actor.identifier.name]['queries'][query.v] = {}
         
-        #! Should actor parameters also be supported?
-        #   - currently no auto-complete option at all?
-    
-    #! Should exporting be restructured to only loop through the events?
+        #! Potential future addition: support actor parameters + autofill
+
     for event in flow.flowchart.events:
-        if hasattr(event.data, 'actor_action'):
+        if isinstance(event.data, ActionEvent):
             json_parent = definitions[event.data.actor.v.identifier.name]['actions']
             event_key = event.data.actor_action.v.v
-        elif hasattr(event.data, 'actor_query'):
+        elif isinstance(event.data, SwitchEvent):
             json_parent = definitions[event.data.actor.v.identifier.name]['queries']
             event_key = event.data.actor_query.v.v
         else:
