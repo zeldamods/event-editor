@@ -112,9 +112,8 @@ def export_definitions(flow: typing.Optional[EventFlow], widget: typing.Optional
 
 def export_actor_classes(actor: typing.Dict[str, typing.Any], category: str, classes: typing.List['StringHolder']) -> None:
     category_root = actor.get(category, {})
-    
+    actor[category] = category_root
+
     for c in classes:
         if c.v not in category_root:
             category_root[c.v] = {}
-    
-    actor[category] = category_root
