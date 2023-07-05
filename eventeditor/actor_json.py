@@ -73,49 +73,48 @@ def export_definitions(flow: typing.Optional[EventFlow], widget: typing.Optional
             definitions = json.loads(file.read())
     except:
         definitions = dict()
-    
+
     for actor in flow.flowchart.actors:
-        if actor.identifier.name not in definitions:
-            definitions[actor.identifier.name] = {}
+        actor_root = definitions.get(actor.identifier.name, {})
+        definitions[actor.identifier.name] = actor_root
 
-        if 'actions' not in definitions[actor.identifier.name]:
-            definitions[actor.identifier.name]['actions'] = {}        
-        for action in actor.actions:
-            if action.v not in definitions[actor.identifier.name]['actions']:
-                definitions[actor.identifier.name]['actions'][action.v] = {}
-
-        if 'queries' not in definitions[actor.identifier.name]:
-            definitions[actor.identifier.name]['queries'] = {}
-        for query in actor.queries:
-            if query.v not in definitions[actor.identifier.name]['queries']:
-                definitions[actor.identifier.name]['queries'][query.v] = {}
-        
+        export_actor_classes(actor_root, 'actions', actor.actions)
+        export_actor_classes(actor_root, 'queries', actor.queries)
         #! Potential future addition: support actor parameters + autofill
 
     for event in flow.flowchart.events:
         if isinstance(event.data, ActionEvent):
-            json_parent = definitions[event.data.actor.v.identifier.name]['actions']
+            event_root = definitions[event.data.actor.v.identifier.name]['actions']
             event_key = event.data.actor_action.v.v
         elif isinstance(event.data, SwitchEvent):
-            json_parent = definitions[event.data.actor.v.identifier.name]['queries']
+            event_root = definitions[event.data.actor.v.identifier.name]['queries']
             event_key = event.data.actor_query.v.v
         else:
             # Skip subflows
             continue
 
-        if event_key not in json_parent:
+        if event_key not in event_root:
             # Shouldn't be reachable, as event names are populated in actor loop?
             # Also means that event types that have already been added can't be skipped,
             # as there is no way to check -- is this okay to ensure all possible
             # parameters are exported (in case an event is missing one?)?
-            json_parent[event_key] = {}
-        if not event.data.params:
-            continue
-        for param in event.data.params.data:
-            # Only populate, never overwrite
-            # Power users can manually edit the json file (or use the copy parameters button)
-            if param not in json_parent[event_key]:
-                json_parent[event_key][param] = event.data.params.data[param]
-    
+            event_root[event_key] = {}
+
+        if event.data.params:
+            for param in event.data.params.data:
+                # Only populate, never overwrite
+                # Power users can manually edit the json file (or use the copy parameters button)
+                if param not in event_root[event_key]:
+                    event_root[event_key][param] = event.data.params.data[param]
+
     with open(_actor_definitions_path, 'wt') as file:
         json.dump(definitions, file)
+
+def export_actor_classes(actor: typing.Dict[str, typing.Any], category: str, classes: typing.List['StringHolder']) -> None:
+    category_root = actor.get(category, {})
+    
+    for c in classes:
+        if c.v not in category_root:
+            category_root[c.v] = {}
+    
+    actor[category] = category_root
