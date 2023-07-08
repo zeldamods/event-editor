@@ -2,6 +2,7 @@ import copy
 import typing
 
 import eventeditor.ai as ai
+import eventeditor.actor_json as aj
 from eventeditor.actor_string_list_model import ActorStringListModel
 from eventeditor.container_model import ContainerModel
 from eventeditor.container_view import ContainerView
@@ -10,6 +11,7 @@ import eventeditor.util as util
 from evfl import Container, Actor, Event
 from evfl.enums import EventType
 import evfl.event
+import json
 import PyQt5.QtCore as qc # type: ignore
 import PyQt5.QtGui as qg # type: ignore
 import PyQt5.QtWidgets as q # type: ignore
@@ -83,6 +85,8 @@ class ActorRelatedEventEditDialog(q.QDialog):
     def createParametersView(self) -> None:
         self.param_view = ContainerView(None, self.param_model, self.flow_data, has_autofill_btn=True)
         self.param_view.autofillRequested.connect(self.onAutofillRequested)
+        self.param_view.copyJsonRequested.connect(self.onCopyJsonRequested)
+        self.param_view.pasteJsonRequested.connect(self.onPasteJsonRequested)
 
     def onAutofillRequested(self) -> None:
         new_actor: Actor = self.actor_cbox.currentData()
@@ -93,7 +97,8 @@ class ActorRelatedEventEditDialog(q.QDialog):
 
         aiprog = ai.load_aiprog(new_actor.identifier.name)
         if not aiprog:
-            q.QMessageBox.critical(self, 'Cannot auto fill', 'Failed to load the actor AI program')
+            if not self.tryJsonAutofill(new_actor.identifier.name, new_attr):
+                q.QMessageBox.critical(self, 'Cannot auto fill', 'Failed to load the actor AI program')
             return
 
         actual_ai_class: typing.Optional[str] = None
@@ -116,6 +121,47 @@ class ActorRelatedEventEditDialog(q.QDialog):
             self.modified_params.data[param.name] = param.get_default_value()
 
         self.param_model.set(self.modified_params)
+    
+    def tryJsonAutofill(self, actor_name: str, attr_name: str) -> bool:        
+        try:
+            event_type = aj.EventType.Query if self.is_switch else aj.EventType.Action
+            parameters = aj.load_event_parameters(actor_name, attr_name, event_type)
+
+            if parameters is None:
+                return False
+
+            self.modified_params.data.clear()
+            for param in parameters:
+                self.modified_params.data[param] = parameters[param]
+            self.param_model.set(self.modified_params)
+
+            return True
+
+        except:
+            return False
+    
+    def onCopyJsonRequested(self) -> None:
+        toClipboard = json.dumps(self.modified_params.data)
+
+        if self.attr_cbox.currentData():
+            params = dict()
+            params[str(self.attr_cbox.currentData().v)] = self.modified_params.data
+            # Remove outer curly brackets for convenience
+            toClipboard = json.dumps(params)[1:-1]
+
+        q.QApplication.clipboard().setText(toClipboard)
+    
+    def onPasteJsonRequested(self) -> None:
+        try:
+            data = json.loads(f'{{{q.QApplication.clipboard().text()}}}')
+            params = data[self.attr_cbox.currentData().v]
+            self.modified_params.data.clear()
+            for param in params:
+                self.modified_params.data[param] = params[param]
+            self.param_model.set(self.modified_params)
+
+        except:
+            q.QMessageBox.critical(self, 'Paste JSON', 'Failed to paste clipboard data as parameters.')
 
     def onActorSelected(self, actor_idx: int) -> None:
         if actor_idx == -1:

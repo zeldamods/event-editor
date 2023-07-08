@@ -9,6 +9,7 @@ import typing
 import evfl
 from evfl import EventFlow
 import eventeditor.ai as ai
+import eventeditor.actor_json as aj
 from eventeditor.actor_view import ActorView
 from eventeditor.event_view import EventView
 from eventeditor.flow_data import FlowData, FlowDataChangeReason
@@ -70,7 +71,9 @@ class MainWindow(q.QMainWindow):
         self.save_action.triggered.connect(self.onSaveFile)
 
         self.save_as_action = q.QAction('Save as...', self)
-        self.save_as_action.setShortcut(qg.QKeySequence.SaveAs)
+        # No shortcut is assigned for Windows in QKeySequence.SaveAs
+        # self.save_as_action.setShortcut(qg.QKeySequence.SaveAs)
+        self.save_as_action.setShortcut('Ctrl+Shift+S')
         self.save_as_action.setEnabled(False)
         self.save_as_action.triggered.connect(self.onSaveAsFile)
 
@@ -103,6 +106,8 @@ class MainWindow(q.QMainWindow):
         view_menu.addAction(self.reload_graph_action)
         self.export_graph_action = q.QAction('E&xport graph data to JSON...', self)
         view_menu.addAction(self.export_graph_action)
+        self.export_definitions_action = q.QAction('Ex&port actor definition data to JSON...', self)
+        view_menu.addAction(self.export_definitions_action)
         view_menu.addSeparator()
         self.add_event_action = q.QAction('&Add event...', self)
         view_menu.addAction(self.add_event_action)
@@ -150,6 +155,7 @@ class MainWindow(q.QMainWindow):
         self.flowchart_view.eventSelected.connect(self.onEventSelected)
         self.reload_graph_action.triggered.connect(self.flowchart_view.reload)
         self.export_graph_action.triggered.connect(self.flowchart_view.export)
+        self.export_definitions_action.triggered.connect(self.flowchart_view.export_definitions)
         self.add_event_action.triggered.connect(self.flowchart_view.addNewEvent)
         self.add_fork_action.triggered.connect(self.flowchart_view.addFork)
 
@@ -180,6 +186,7 @@ class MainWindow(q.QMainWindow):
     def readSettings(self) -> None:
         settings = qc.QSettings()
         ai.set_rom_path(settings.value('paths/rom_root'))
+        aj.set_actor_definitions_path(settings.value('paths/actor_definitions_root'))
         settings.beginGroup('MainWindow')
         self.resize(settings.value('size', qc.QSize(800, 600)))
         self.move(settings.value('pos', qc.QPoint(200, 200)))
@@ -201,6 +208,11 @@ class MainWindow(q.QMainWindow):
         settings.setValue('visible_names', self.event_name_visible_action.isChecked())
         settings.setValue('visible_params', self.event_param_visible_action.isChecked())
         settings.endGroup()
+
+        if aj._actor_definitions_path:
+            settings.beginGroup('paths')
+            settings.setValue('actor_definitions_root', str(aj._actor_definitions_path))
+            settings.endGroup()
 
     def updateTitleAndActions(self) -> None:
         if not self.flow:

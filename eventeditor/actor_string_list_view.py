@@ -1,6 +1,7 @@
 import typing
 
 import eventeditor.ai as ai
+import eventeditor.actor_json as aj
 import eventeditor.util as util
 from eventeditor.search_bar import SearchBar
 from evfl import EventFlow, Actor
@@ -135,8 +136,16 @@ class ActorActionListView(ActorStringListView):
         if not self.actor:
             return ''
         name = self.actor.identifier.name
+
+        actions = []
         aiprog = ai.load_aiprog(name)
-        actions = list(aiprog.actions.keys()) if aiprog else []
+        if aiprog:
+            actions = list(aiprog.actions.keys())
+        else:
+            json_actions = aj.load_actions(name)
+            if json_actions:
+                actions = list(json_actions)
+
         add_dialog = ActorAIClassAddDialog(self, qc.QStringListModel(actions, self))
         add_dialog.setWindowTitle(f'Add an action for {name}')
         ret = add_dialog.exec_()
@@ -154,8 +163,16 @@ class ActorQueryListView(ActorStringListView):
         if not self.actor:
             return ''
         name = self.actor.identifier.name
+
+        queries = []
         aiprog = ai.load_aiprog(name)
-        queries = list(aiprog.queries.keys()) if aiprog else []
+        if aiprog:
+            queries = list(aiprog.queries.keys())
+        else:
+            json_queries = aj.load_queries(name)
+            if json_queries:
+                queries = list(json_queries)
+
         add_dialog = ActorAIClassAddDialog(self, qc.QStringListModel(queries, self))
         add_dialog.setWindowTitle(f'Add a query for {name}')
         ret = add_dialog.exec_()

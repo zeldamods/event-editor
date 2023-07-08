@@ -1,6 +1,7 @@
 import json
 import typing
 
+import eventeditor.actor_json as aj
 from eventeditor.container_model import ContainerModel
 from eventeditor.container_view import ContainerView
 from eventeditor.event_branch_editors import SwitchEventEditDialog, ForkEventEditDialog
@@ -202,6 +203,12 @@ class FlowchartView(q.QWidget):
                 json.dump(data, f, default=lambda x: str(x))
         except:
             q.QMessageBox.critical(self, 'Export graph data', 'Failed to write to ' + path)
+    
+    def export_definitions(self) -> None:
+        try:
+            aj.export_definitions(self.flow_data.flow, self)
+        except:
+            q.QMessageBox.critical(self, 'Export actor definition data', 'Failed to write to ' + str(aj._actor_definitions_path))
 
     def reload(self) -> None:
         self.view.reload()

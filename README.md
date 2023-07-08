@@ -4,9 +4,18 @@
 
 Install Python 3.6+ (**64 bit version**) and PyQt5, then run `pip install eventeditor`.
 
-### Auto completion
+### Configuration
 
-In order to enable auto completion for actors, actions and queries, add:
+The configuration file is stored:
+
+* On Linux or macOS: at `~/.config/eventeditor/eventeditor.ini`
+* On Windows: at `%APPDATA%/eventeditor/eventeditor.ini`
+
+### Auto-completion
+
+#### Breath of the Wild
+
+In order to enable auto-completion for actors, actions, and queries, add:
 
 ```ini
 [paths]
@@ -18,10 +27,11 @@ to EventEditor's configuration file, where `/path/to/game_rom` is a path such th
 An easy, recommended way to get the required file structure without extracting every archive
 is to use [botwfstools](https://github.com/leoetlino/botwfstools).
 
-The configuration file is stored:
+#### Other games
 
-* On Linux or macOS: at `~/.config/eventeditor/eventeditor.ini`
-* On Windows: at `%APPDATA%/eventeditor/eventeditor.ini`
+Alternatively, JSON actor definitions can be generated under *Flowchart* > *Export actor definition data to JSON*. This will generate information for auto-completion from the currently open event flow. The first time this is run, a prompt will appear asking for where to save this information.
+
+This action can be safely repeated in case other event flows contain actors, actions, or queries that have yet to be included in the JSON file (existing entries will not be overwritten).
 
 ### Known issues
 
