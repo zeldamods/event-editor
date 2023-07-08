@@ -24,12 +24,12 @@ def load_actor_json(actor_name: str) -> typing.Optional[typing.Dict[str, typing.
     try:
         # First look for individual actor file (overrides; for power users)
         with open(_actor_definitions_path.parent/f'{actor_name}.json', 'rt') as file:
-            return json.loads(file.read())
+            return json.load(file)
     except:
         try:
             # Otherwise look in actor definitions file
             with open(_actor_definitions_path, 'rt') as file:
-                return json.loads(file.read())[actor_name]
+                return json.load(file)[actor_name]
         except:
             return None
 
