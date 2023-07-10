@@ -229,6 +229,7 @@ class MainWindow(q.QMainWindow):
         self.reload_graph_action.setEnabled(bool(self.flow) and bool(self.flow_path))
         self.save_action.setEnabled(bool(self.flow) and bool(self.flow_path))
         self.save_as_action.setEnabled(bool(self.flow))
+        self.export_definitions_action.setEnabled(bool(self.flow))
 
     def renameFlow(self) -> None:
         if not self.flow or not self.flow.flowchart:

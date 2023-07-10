@@ -57,11 +57,7 @@ def load_queries(actor_name: str) -> typing.Optional[typing.Iterable[str]]:
     except:
         return None
 
-def export_definitions(flow: typing.Optional[EventFlow], widget: typing.Optional['QWidget']) -> None:
-    if not flow:
-        q.QMessageBox.information(widget, 'Export actor definition data', 'Open an event flow first')
-        return
-
+def export_definitions(flow: EventFlow, widget: typing.Optional['QWidget']) -> None:
     if not _actor_definitions_path:
         set_actor_definitions_path(q.QFileDialog.getSaveFileName(widget, 'Export actor definitions to...',  'actor_definitions', 'JSON (*.json)')[0])
 
