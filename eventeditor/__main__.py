@@ -222,14 +222,14 @@ class MainWindow(q.QMainWindow):
             self.setWindowTitle(f'EventEditor - {indicator}{self.flow.name}')
 
         self.open_autosave_action.setEnabled(bool(self.flow) and bool(self.flow_path))
-        self.add_event_action.setEnabled(bool(self.flow) and bool(self.flow_path))
-        self.add_fork_action.setEnabled(bool(self.flow) and bool(self.flow_path))
-        self.event_name_visible_action.setEnabled(bool(self.flow) and bool(self.flow_path))
-        self.rename_flow_action.setEnabled(bool(self.flow) and bool(self.flow_path))
-        self.reload_graph_action.setEnabled(bool(self.flow) and bool(self.flow_path))
         self.save_action.setEnabled(bool(self.flow) and bool(self.flow_path))
         self.save_as_action.setEnabled(bool(self.flow))
+        self.rename_flow_action.setEnabled(bool(self.flow) and bool(self.flow_path))
+
+        self.reload_graph_action.setEnabled(bool(self.flow) and bool(self.flow_path))
         self.export_definitions_action.setEnabled(bool(self.flow))
+        self.add_event_action.setEnabled(bool(self.flow) and bool(self.flow_path))
+        self.add_fork_action.setEnabled(bool(self.flow) and bool(self.flow_path))
 
     def renameFlow(self) -> None:
         if not self.flow or not self.flow.flowchart:
