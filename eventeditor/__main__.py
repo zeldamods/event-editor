@@ -228,6 +228,7 @@ class MainWindow(q.QMainWindow):
         self.rename_flow_action.setEnabled(bool(self.flow) and bool(self.flow_path))
 
         self.reload_graph_action.setEnabled(bool(self.flow) and bool(self.flow_path))
+        self.export_graph_action.setEnabled(bool(self.flow))
         self.export_definitions_action.setEnabled(bool(self.flow))
         self.add_event_action.setEnabled(bool(self.flow) and bool(self.flow_path))
         self.add_fork_action.setEnabled(bool(self.flow) and bool(self.flow_path))
