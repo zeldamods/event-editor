@@ -17,6 +17,13 @@ class EventType(IntEnum):
     Action = 0
     Query = 1
 
+def load_actor_definitions() -> typing.Optional[typing.Dict[str, typing.Any]]:
+    try:
+        with open(_actor_definitions_path, 'rt') as file:
+            return json.loads(file.read())
+    except:
+        return None
+
 def load_actor_json(actor_name: str) -> typing.Optional[typing.Dict[str, typing.Any]]:
     if not _actor_definitions_path:
         return None
@@ -64,11 +71,7 @@ def export_definitions(flow: EventFlow, widget: typing.Optional['QWidget']) -> N
     if not _actor_definitions_path:
         return
 
-    try:
-        with open(_actor_definitions_path, 'rt') as file:
-            definitions = json.loads(file.read())
-    except:
-        definitions = dict()
+    definitions = load_actor_definitions() or dict()
 
     for actor in flow.flowchart.actors:
         actor_root = definitions.get(actor.identifier.name, {})

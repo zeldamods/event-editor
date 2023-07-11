@@ -9,6 +9,7 @@ from eventeditor.event_edit_dialog import show_event_editor
 from eventeditor.event_chooser_dialog import show_event_type_chooser, add_new_event, EventChooserDialog, CheckableEventParentListWidget
 from eventeditor.event_fork_chooser_dialog import EventForkChooserDialog
 from eventeditor.flow_data import FlowData, FlowDataChangeReason
+import eventeditor.flowchart_tools as ft
 from eventeditor.search_bar import SearchBar
 from eventeditor.util import *
 from evfl import Container, Flowchart, Actor, Event, EventFlow, ActionEvent, SwitchEvent, ForkEvent, JoinEvent, SubFlowEvent
@@ -209,6 +210,18 @@ class FlowchartView(q.QWidget):
             aj.export_definitions(self.flow_data.flow, self)
         except:
             q.QMessageBox.critical(self, 'Export actor definition data', 'Failed to write to ' + str(aj._actor_definitions_path))
+    
+    def reorder_event_parameters(self) -> None:
+        try:
+            definitions = aj.load_actor_definitions()
+            if not definitions:
+                q.QMessageBox.critical(self, 'Reorder event parameters', 'Failed to load actor definitions')
+                return
+
+            ft.reorder_event_flow_parameters(self.flow_data.flow, definitions)
+            self.flow_data.flowDataChanged.emit(FlowDataChangeReason.EventParameters)
+        except Exception as e:
+            print(e)
 
     def reload(self) -> None:
         self.view.reload()
