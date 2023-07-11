@@ -1,15 +1,17 @@
-import json
 import typing
 
+import eventeditor.actor_json as aj
 from evfl import EventFlow
 from evfl.event import ActionEvent, SwitchEvent
 
-def reorder_event_flow_parameters(flow: EventFlow, definitions: typing.Dict[str, typing.Any]) -> None:
+def reorder_event_flow_parameters(flow: EventFlow) -> None:
+    # Should probably cache definition loads, though
+    # current is useful for ensuring latest file version
     for event in flow.flowchart.events:
         if isinstance(event.data, ActionEvent):
-            definition = definitions[event.data.actor.v.identifier.name]['actions'][event.data.actor_action.v.v].keys()
+            definition = aj.load_event_parameters(event.data.actor.v.identifier.name, event.data.actor_action.v.v, aj.EventType.Action)
         elif isinstance(event.data, SwitchEvent):
-            definition = definitions[event.data.actor.v.identifier.name]['queries'][event.data.actor_query.v.v].keys()
+            definition = aj.load_event_parameters(event.data.actor.v.identifier.name, event.data.actor_query.v.v, aj.EventType.Query)
         else:
             continue
 
@@ -18,7 +20,7 @@ def reorder_event_flow_parameters(flow: EventFlow, definitions: typing.Dict[str,
                 event_type = event.data.actor_action.v.v
             elif isinstance(event.data, SwitchEvent):
                 event_type = event.data.actor_query.v.v
-            print(f' > {event.data.actor.v.identifier.name}::{event.name} ({event_type})')
+            print(f' > ndef: {event.data.actor.v.identifier.name}::{event_type} ({event.name})')
             continue
 
         reorder_event_parameters(event.data.params.data, definition)
