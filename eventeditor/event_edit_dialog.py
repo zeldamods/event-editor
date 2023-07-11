@@ -85,6 +85,7 @@ class ActorRelatedEventEditDialog(q.QDialog):
     def createParametersView(self) -> None:
         self.param_view = ContainerView(None, self.param_model, self.flow_data, has_autofill_btn=True)
         self.param_view.autofillRequested.connect(self.onAutofillRequested)
+        self.param_view.reorderRequested.connect(self.onReorderRequested)
         self.param_view.copyJsonRequested.connect(self.onCopyJsonRequested)
         self.param_view.pasteJsonRequested.connect(self.onPasteJsonRequested)
 
@@ -140,6 +141,26 @@ class ActorRelatedEventEditDialog(q.QDialog):
         except:
             return False
     
+    def onReorderRequested(self) -> None:
+        new_actor: Actor = self.actor_cbox.currentData()
+        new_attr: str = self.attr_cbox.currentData().v if self.attr_cbox.currentData() else ''
+        if not new_actor or not new_attr:
+            q.QMessageBox.critical(self, 'Cannot reorder parameters', 'Please select an actor and a function.')
+            return
+
+        event_type = aj.EventType.Query if self.is_switch else aj.EventType.Action
+        parameters = aj.load_event_parameters(new_actor.identifier.name, new_attr, event_type)
+
+        if parameters is None:
+            q.QMessageBox.critical(self, 'Cannot reorder parameters', 'Failed to load the actor definition.')
+            return
+
+        # Parameters not contained in the definition will be left at the start of the collection
+        for param in parameters:
+            if param in self.modified_params.data:
+                self.modified_params.data[param] = self.modified_params.data.pop(param)
+        self.param_model.set(self.modified_params)
+
     def onCopyJsonRequested(self) -> None:
         toClipboard = json.dumps(self.modified_params.data)
 
@@ -150,7 +171,7 @@ class ActorRelatedEventEditDialog(q.QDialog):
             toClipboard = json.dumps(params)[1:-1]
 
         q.QApplication.clipboard().setText(toClipboard)
-    
+
     def onPasteJsonRequested(self) -> None:
         try:
             data = json.loads(f'{{{q.QApplication.clipboard().text()}}}')

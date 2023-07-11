@@ -145,6 +145,7 @@ class ContainerAddItemDialog(q.QDialog):
 
 class ContainerView(q.QWidget):
     autofillRequested = qc.pyqtSignal()
+    reorderRequested = qc.pyqtSignal()
     copyJsonRequested = qc.pyqtSignal()
     pasteJsonRequested = qc.pyqtSignal()
 
@@ -176,6 +177,9 @@ class ContainerView(q.QWidget):
         self.autofill_btn = q.QPushButton('Auto fill')
         self.autofill_btn.setStyleSheet('padding: 2px 5px;')
         self.autofill_btn.clicked.connect(self.autofillRequested)
+        self.reorder_btn = q.QPushButton('Reorder')
+        self.reorder_btn.setStyleSheet('padding: 2px 5px;')
+        self.reorder_btn.clicked.connect(self.reorderRequested)
         self.copy_btn = q.QPushButton('Copy JSON')
         self.copy_btn.setStyleSheet('padding: 2px 5px;')
         self.copy_btn.clicked.connect(self.copyJsonRequested)
@@ -189,6 +193,7 @@ class ContainerView(q.QWidget):
         if has_autofill_btn:
             box.addWidget(self.copy_btn)
             box.addWidget(self.paste_btn)
+            box.addWidget(self.reorder_btn)
             box.addWidget(self.autofill_btn)
         box.addWidget(self.add_btn)
 
