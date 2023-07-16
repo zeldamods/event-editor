@@ -52,43 +52,43 @@ class MainWindow(q.QMainWindow):
             self.readFlow(self.args.event_flow_file)
 
     def initMenu(self) -> None:
+        menu = self.menuBar()
+
+        file_menu = menu.addMenu('&File')
         self.new_action = q.QAction('&New...', self)
         self.new_action.setShortcut(qg.QKeySequence.New)
         self.new_action.triggered.connect(self.onNewFile)
-
+        file_menu.addAction(self.new_action)
         self.open_action = q.QAction('&Open...', self)
         self.open_action.setShortcut(qg.QKeySequence.Open)
         self.open_action.triggered.connect(self.onOpenFile)
-
+        file_menu.addAction(self.open_action)
+        file_menu.addSeparator()
         self.open_autosave_action = q.QAction('Open autosave...', self)
         self.open_autosave_action.triggered.connect(lambda: self.onOpenFile(str(self.flow_data.auto_save.get_directory()), name_filter=f'Flowchart autosave (autosave_{self.flow_data.flow.name}_*.bfevfl.gz)'))
         if not self.flow_data.auto_save.get_directory():
             self.open_autosave_action.setVisible(False)
-
+        file_menu.addAction(self.open_autosave_action)
         self.save_action = q.QAction('&Save', self)
         self.save_action.setShortcut(qg.QKeySequence.Save)
         self.save_action.setEnabled(False)
         self.save_action.triggered.connect(self.onSaveFile)
-
+        file_menu.addAction(self.save_action)
         self.save_as_action = q.QAction('Save as...', self)
         # No shortcut is assigned for Windows in QKeySequence.SaveAs
         # self.save_as_action.setShortcut(qg.QKeySequence.SaveAs)
         self.save_as_action.setShortcut('Ctrl+Shift+S')
         self.save_as_action.setEnabled(False)
         self.save_as_action.triggered.connect(self.onSaveAsFile)
-
+        file_menu.addAction(self.save_as_action)
         self.rename_flow_action = q.QAction('Rename flow', self)
         self.rename_flow_action.triggered.connect(self.renameFlow)
-
+        file_menu.addAction(self.rename_flow_action)
+        file_menu.addSeparator()
         self.exit_action = q.QAction('E&xit', self)
         self.exit_action.setShortcut(qg.QKeySequence.Quit)
         self.exit_action.triggered.connect(self.close)
-
-        menu = self.menuBar()
-
-        file_menu = menu.addMenu('&File')
-        for a in (self.new_action, self.open_action, self.open_autosave_action, self.save_action, self.save_as_action, self.rename_flow_action, self.exit_action):
-            file_menu.addAction(a)
+        file_menu.addAction(self.exit_action)
 
         view_menu = menu.addMenu('Flowc&hart')
         self.event_name_visible_action = q.QAction('&Show event names', self)
@@ -101,6 +101,7 @@ class MainWindow(q.QMainWindow):
         self.event_param_visible_action.setChecked(False)
         self.event_param_visible_action.triggered.connect(self.onEventParamVisibilityChanged)
         view_menu.addAction(self.event_param_visible_action)
+        view_menu.addSeparator()
         self.reload_graph_action = q.QAction('&Reload graph', self)
         self.reload_graph_action.setShortcut('Ctrl+Shift+R')
         view_menu.addAction(self.reload_graph_action)
@@ -222,13 +223,15 @@ class MainWindow(q.QMainWindow):
             self.setWindowTitle(f'EventEditor - {indicator}{self.flow.name}')
 
         self.open_autosave_action.setEnabled(bool(self.flow) and bool(self.flow_path))
-        self.add_event_action.setEnabled(bool(self.flow) and bool(self.flow_path))
-        self.add_fork_action.setEnabled(bool(self.flow) and bool(self.flow_path))
-        self.event_name_visible_action.setEnabled(bool(self.flow) and bool(self.flow_path))
-        self.rename_flow_action.setEnabled(bool(self.flow) and bool(self.flow_path))
-        self.reload_graph_action.setEnabled(bool(self.flow) and bool(self.flow_path))
         self.save_action.setEnabled(bool(self.flow) and bool(self.flow_path))
         self.save_as_action.setEnabled(bool(self.flow))
+        self.rename_flow_action.setEnabled(bool(self.flow) and bool(self.flow_path))
+
+        self.reload_graph_action.setEnabled(bool(self.flow) and bool(self.flow_path))
+        self.export_graph_action.setEnabled(bool(self.flow))
+        self.export_definitions_action.setEnabled(bool(self.flow))
+        self.add_event_action.setEnabled(bool(self.flow) and bool(self.flow_path))
+        self.add_fork_action.setEnabled(bool(self.flow) and bool(self.flow_path))
 
     def renameFlow(self) -> None:
         if not self.flow or not self.flow.flowchart:
