@@ -15,15 +15,12 @@ def reorder_event_flow_parameters(flow: EventFlow) -> None:
         else:
             continue
 
+        # Nothing to sort
         if not event.data.params:
             continue
 
+        # No defined order to sort by
         if not definition:
-            # if isinstance(event.data, ActionEvent):
-            #     event_type = event.data.actor_action.v.v
-            # elif isinstance(event.data, SwitchEvent):
-            #     event_type = event.data.actor_query.v.v
-            # print(f' > ndef: {event.data.actor.v.identifier.name}::{event_type} ({event.name})')
             continue
 
         reorder_event_parameters(event.data.params.data, definition)
