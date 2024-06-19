@@ -1,2 +1,3 @@
 eventeditor/assets/lib/* binary
 _version.py export-subst
+eventeditor/_version.py export-subst
