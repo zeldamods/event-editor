@@ -26,7 +26,7 @@ setuptools.setup(
         'evfl~=1.1',
         'pyqt5-sip~=12.7',
         'pyqtwebengine~=5.14',
-        'PyYAML~=5.1',
+        'PyYAML~=6.0',
         'aamp~=1.0',
         'byml~=2.0',
         'oead~=1.1',
